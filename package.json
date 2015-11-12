@@ -1,0 +1,32 @@
+{
+  "name": "json-grammar",
+  "version": "0.1.0",
+  "description": "Grammar-based description and validation of JSON structures.",
+  "main": "index.js",
+  "scripts": {
+    "test": "testsCommand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericprud/jsg.git"
+  },
+  "keywords": [
+    "JSON",
+    "schema",
+    "grammar",
+    "context-sensitive",
+    "validation"
+  ],
+  "author": "Eric Prud'hommeaux <eric.npm@w3.org> (http://www.w3.org/People/Eric/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ericprud/jsg/issues"
+  },
+  "homepage": "https://github.com/ericprud/jsg#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "jison": "^0.4.15",
+    "mocha": "^2.3.3"
+  }
+}
