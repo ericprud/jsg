@@ -1,20 +1,31 @@
 # yacker grammar for jsg files
+# github URL: https://github.com/ericprud/jsg/blob/master/doc/jsg.bnf
+# yacker URL: https://www.w3.org/2005/01/yacker/uploads/jsg?lang=perl
 
-grammarDef       : (objectDef | nonObject)* "@terminals" terminal*
-objectDef        : ID ':' particle+ ('|' particle*)* ';'
-particle         : ID cardinality?
-                 | propertyOrGroup
+doc              : directive* grammarDef
+directive        : ".TYPE" ID ";"
+		 | ".IGNORE" ID* ";"
+grammarDef       : (objectDef | arrayDef | nonObject | terminal)*
+objectDef        : ID objectExpr
+objectExpr       : '{'  '}'
+                 | '{' particle+ ('|' particle*)* '}'
+                 | '{' ID '->' propertyType '}'
+arrayDef         : ID arrayExpr
+arrayExpr        : '[' (propertyType ','?)+ ('|' (propertyType ','?)*)* ']'
+particle         : ID cardinality? ','?
+                 | propertyOrGroup ','?
 propertyOrGroup  : ID ':' propertyType cardinality?
                  | '(' ID ('|' ID)+ ')' ':' propertyType cardinality?
                  | '(' propertyOrGroup+ ('|' propertyOrGroup+)+ ')'
 propertyType     : ID
                  | STRING
-                 | '[' ID ('->' ID)? ']'
+                 | objectExpr
+                 | arrayExpr
                  | '(' typeAlternatives ')'
-typeAlternatives : ID ('|' STRING)+
-                 | STRING ('|' STRING)+
+		 | '.'
+typeAlternatives : (ID|STRING) ('|' (ID|STRING))+
 nonObject        : ID '=' particle+ ('|' particle*)* ';'
-terminal         : ID '=' STRING ('+' STRING)*
+terminal         : ID ':' STRING ('+' STRING)*
 cardinality      : '?' | '*'
 
 @terminals

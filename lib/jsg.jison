@@ -1,12 +1,12 @@
 %{
-  function makeGrammar (decls) {
+  function makeGrammar (directives, decls) {
     var m = { };
     var o = [ ];
     decls.forEach(function (elt) {
       m[elt.id] = elt;
       o.push(elt.id)
     });
-    return { start: o[0], order: o, type: "schema", map: m };
+    return extend(directives, { start: o[0], order: o, type: "schema", map: m });
   }
 
   function logret (x) {
@@ -29,6 +29,8 @@
 COMMENT			('//'|'#') [^\u000a\u000d]*
 ID                      [a-zA-Z_]+
 STRING                  '"' ([^\"]|'\\"')* '"'
+DOT_TYPE                '.' [Tt][Yy][Pp][Ee]
+DOT_IGNORE              '.' [Ii][Gg][Nn][Oo][Rr][Ee]
 %%
 \s+|{COMMENT} /**/
 ":"          return 'GT_COLON';
@@ -46,6 +48,9 @@ STRING                  '"' ([^\"]|'\\"')* '"'
 "+"          return 'GT_PLUS';
 ";"          return 'GT_SEMI';
 "*"          return 'GT_TIMES';
+{DOT_TYPE}   return 'DOT_TYPE';
+{DOT_IGNORE} return 'DOT_IGNORE';
+"."          return 'GT_DOT';
 {ID}         return 'ID';
 {STRING}     return 'STRING';
 .            return 'invalid character '+yytext;
@@ -54,14 +59,33 @@ STRING                  '"' ([^\"]|'\\"')* '"'
 
 /* operator associations and precedence */
 
-%start grammarDef
+//%start grammarDef
 
 %% /* language grammar */
 
-grammarDef:
-    _Q_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_Qterminal_E_C_E_Star	{
-      return makeGrammar($1);
+doc:
+    _Qdirective_E_Star grammarDef	{
+        return makeGrammar($1, $2);
     }
+  ;
+
+_Qdirective_E_Star:
+      -> { }
+    | _Qdirective_E_Star directive	-> extend($1, $2)
+  ;
+
+directive:
+    DOT_TYPE ID GT_SEMI	-> { discriminator: $2 }
+    | DOT_IGNORE _QID_E_Star GT_SEMI	-> { ignore: $2 }
+  ;
+
+_QID_E_Star:
+      -> [ ]
+    | _QID_E_Star ID	-> $1.concat($2)
+  ;
+
+grammarDef:
+    _Q_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_Qterminal_E_C_E_Star	
   ;
 
 _O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_Qterminal_E_C:
@@ -82,7 +106,9 @@ objectDef:
   ;
 
 objectExpr:
-    GT_LCURLEY _resolve_Qparticle_E_Plus _Q_O_QGT_PIPE_E_S_Qparticle_E_Star_C_E_Star GT_RCURLEY
+    GT_LCURLEY GT_RCURLEY
+    -> { type: "object", expr: { type: "epsilon" } }
+    | GT_LCURLEY _resolve_Qparticle_E_Plus _Q_O_QGT_PIPE_E_S_Qparticle_E_Star_C_E_Star GT_RCURLEY
     -> { type: "object", expr: $3.length ? { type: "or", exprs: [$2].concat($3) } : $2 }
     | GT_LCURLEY ID GT_MINUS_GT propertyType GT_RCURLEY	
     -> { type: "map", from: $2, to: $4 }
@@ -192,48 +218,33 @@ propertyType:
     | STRING	
     | objectExpr	
     | arrayExpr	
-//    | GT_LBRACKET ID _Q_O_QGT_MINUS_GT_E_S_QID_E_C_E_Opt GT_RBRACKET	-> $3 === null ? { type: "array", of: $2 } : { type: "map", from: $2, to: $3 } // !!! move to objectExpr and arrayExpr
     | GT_LPAREN typeAlternatives GT_RPAREN	-> $2
-  ;
-
-_O_QGT_MINUS_GT_E_S_QID_E_C: // remove
-    GT_MINUS_GT ID	-> $2
-  ;
-
-_Q_O_QGT_MINUS_GT_E_S_QID_E_C_E_Opt: // remove
-      -> null
-    | _O_QGT_MINUS_GT_E_S_QID_E_C	-> $1
+    | GT_DOT
   ;
 
 typeAlternatives:
-    ID _Q_O_QGT_PIPE_E_S_QSTRING_E_C_E_Plus	-> [$1].concat($2)
-    | STRING _Q_O_QGT_PIPE_E_S_QSTRING_E_C_E_Plus	-> [$1].concat($2)
+    _O_QID_E_Or_QSTRING_E_C _Q_O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C_E_Plus	-> [$1].concat($2)
   ;
 
-_O_QGT_PIPE_E_S_QSTRING_E_C:
-    GT_PIPE STRING	-> $2
+_O_QID_E_Or_QSTRING_E_C:
+    ID
+    | STRING
   ;
 
-_Q_O_QGT_PIPE_E_S_QSTRING_E_C_E_Plus:
-    _O_QGT_PIPE_E_S_QSTRING_E_C	-> [$1]
-    | _Q_O_QGT_PIPE_E_S_QSTRING_E_C_E_Plus _O_QGT_PIPE_E_S_QSTRING_E_C	-> $1.concat($2)
+_O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C:
+    GT_PIPE _O_QID_E_Or_QSTRING_E_C	-> $2
+  ;
+
+_Q_O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C_E_Plus:
+    _O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C	-> [$1]
+    | _Q_O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C_E_Plus _O_QGT_PIPE_E_S_QID_E_Or_QSTRING_E_C	-> $1.concat($2)
   ;
 
 nonObject:
-    //ID GT_EQUAL _Qparticle_E_Plus _Q_O_QGT_PIPE_E_S_Qparticle_E_Star_C_E_Star GT_SEMI	
     ID GT_EQUAL _resolve_Qparticle_E_Plus _Q_O_QGT_PIPE_E_S_Qparticle_E_Star_C_E_Star GT_SEMI	
     -> { type: "nonObject", id: $1, expr: $4.length ? { type: "or", exprs: [$3].concat($4) } : $3 }
     //-> { type: "nonObject", id: $1, vals: [$3].concat($4) }
   ;
-
-// nonObject:
-//     ID GT_EQUAL ID _Q_O_QGT_PIPE_E_S_QID_E_C_E_Star GT_SEMI	-> { type: "nonObject", id: $1, vals: [$3].concat($4) }
-//   ;
-
-// _Q_O_QGT_PIPE_E_S_QID_E_C_E_Star:
-//       -> []
-//     | _Q_O_QGT_PIPE_E_S_QID_E_C_E_Star _O_QGT_PIPE_E_S_QID_E_C	-> $1.concat($2)
-//   ;
 
 terminal:
     ID GT_COLON STRING _Q_O_QGT_PLUS_E_S_QSTRING_E_C_E_Star	-> { type: "terminal", id: $1, regexp: $3.slice(1, -1).concat($4.map(function (s) { return s.slice(1, -1); }).join('')) }
