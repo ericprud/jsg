@@ -1,1 +1,1 @@
-{ "type": "Schema", "unknowProperty": "x" }
+{ "type": "Schema", "unknownProperty": "x" }
