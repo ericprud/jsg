@@ -11,7 +11,7 @@ objectExpr       : '{'  '}'
                  | '{' particle+ ('|' particle*)* '}'
                  | '{' ID '->' propertyType '}'
 arrayDef         : ID arrayExpr
-arrayExpr        : '[' (propertyType ','?)+ ('|' (propertyType ','?)*)* ']'
+arrayExpr        : '[' propertyType ('|' propertyType)* ']'
 particle         : ID cardinality? ','?
                  | propertyOrGroup ','?
 propertyOrGroup  : ID ':' propertyType cardinality?

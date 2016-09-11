@@ -142,31 +142,22 @@ arrayDef:
     ID arrayExpr	;
 
 arrayExpr:
-    GT_LBRACKET _Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Plus _Q_O_QGT_PIPE_E_S_QpropertyType_E_S_QGT_COMMA_E_Opt_Star_C_E_Star GT_RBRACKET	
-    -> { type: "array", of: $2 }
+    GT_LBRACKET propertyType _Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star GT_RBRACKET	
+    -> { type: "array", of: $3.length ? { type: "or", exprs: [$2].concat($3) } : $2 }
+  ;
+
+_O_QGT_PIPE_E_S_QpropertyType_E_C:
+    GT_PIPE propertyType	-> $2
+  ;
+
+_Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star:
+      -> []
+    | _Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star _O_QGT_PIPE_E_S_QpropertyType_E_C	-> $1.concat($2)
   ;
 
 _QGT_COMMA_E_Opt:
     
     | GT_COMMA	;
-
-_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C:
-    propertyType _QGT_COMMA_E_Opt	;
-
-_Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Plus:
-    _O_QpropertyType_E_S_QGT_COMMA_E_Opt_C	
-    | _Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Plus _O_QpropertyType_E_S_QGT_COMMA_E_Opt_C	;
-
-_Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Star:
-    
-    | _Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Star _O_QpropertyType_E_S_QGT_COMMA_E_Opt_C	;
-
-_O_QGT_PIPE_E_S_QpropertyType_E_S_QGT_COMMA_E_Opt_Star_C:
-    GT_PIPE _Q_O_QpropertyType_E_S_QGT_COMMA_E_Opt_C_E_Star	;
-
-_Q_O_QGT_PIPE_E_S_QpropertyType_E_S_QGT_COMMA_E_Opt_Star_C_E_Star:
-    
-    | _Q_O_QGT_PIPE_E_S_QpropertyType_E_S_QGT_COMMA_E_Opt_Star_C_E_Star _O_QGT_PIPE_E_S_QpropertyType_E_S_QGT_COMMA_E_Opt_Star_C	;
 
 particle:
       ID _Qcardinality_E_Opt	-> { type: "reference", id: $1, card: $2 }
@@ -214,11 +205,11 @@ _Q_O_QGT_PIPE_E_S_QpropertyOrGroup_E_Plus_C_E_Plus:
   ;
 
 propertyType:
-    ID	
+      ID	-> { type: "reference", id: $1, card: "" }
     | STRING	
     | objectExpr	
     | arrayExpr	
-    | GT_LPAREN typeAlternatives GT_RPAREN	-> $2
+    | GT_LPAREN typeAlternatives GT_RPAREN	-> { type: "typeChoices", choices: $2 }
     | GT_DOT
   ;
 
