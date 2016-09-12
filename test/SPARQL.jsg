@@ -1,0 +1,72 @@
+# JSG grammar for SPARQL.js JSON format
+# test:
+#    SPARQL.js/test/parsedQueries$ ../../../jsg/lib/cli.js -v *.json
+# see: https://github.com/ericprud/jsg
+
+op = query | update;
+query { type:"query" base:IRI? prefixes:{PREFIX->IRI}? # absent in subqueries
+  queryType:("SELECT"|"CONSTRUCT"|"DESCRIBE"|"ASK")
+  from:fromSpec?
+  reduced:BOOLEAN?
+  variables:[VARIABLE|binding]?
+  template:[triple]?
+  where:[pattern]? # ASK query
+  distinct:BOOLEAN? order:[order]? limit:NUMBER? offset:NUMBER?
+  group:[groupBy]? having:[expression]?
+  values:[valueBinding]?
+}
+fromSpec { default:[IRI] named:[IRI] }
+
+update { type:"update" prefixes:{PREFIX->IRI} updates:[updateOp] }
+updateOp = add|load|copy|move|insert|delete|insertdelete|deletewhere;
+add { type:"add" silent:BOOLEAN? source:graphSpec destination:graphSpec? }
+load { type:"load" silent:BOOLEAN? source:IRI destination:IRI? }
+copy { type:"copy" silent:BOOLEAN? source:graphSpec destination:graphSpec }
+move { type:"move" silent:BOOLEAN? source:graphSpec destination:graphSpec }
+graphSpec { type:"graph" default:BOOLEAN? name:IRI? }
+insert { updateType:"insert" insert:[pattern] where:[pattern]? }
+delete { updateType:"delete" delete:[pattern] where:[pattern]? }
+insertdelete { updateType:"insertdelete" graph:(IRI|BNODE|VARIABLE)? insert:[pattern] delete:[pattern] where:[pattern]? }
+deletewhere { updateType:"deletewhere" delete:[pattern] }
+
+binding { expression:expression variable:VARIABLE }
+pattern = bgp | optional | union | group | minus | graph | service | filter | bind | query | values; # move to where
+bgp { type:"bgp" triples:[triple] }
+triple { subject:(IRI|BNODE|VARIABLE) predicate:predicateOrPath object:(IRI|BNODE|LITERAL|VARIABLE) }
+predicateOrPath = IRI|VARIABLE|path;
+path { type:"path" pathType:("|"|"/"|"|"|"^"|"+"|"*"|"!") items:[predicateOrPath] }
+optional { type:"optional" patterns:[pattern] }
+union { type:"union" patterns:[pattern] }
+group { type:"group" patterns:[pattern] }
+minus { type:"minus" patterns:[pattern] }
+graph { type:"graph" name:(IRI|BNODE|VARIABLE) patterns:[pattern]? triples:[triple]? }
+service { type:"service" name:(IRI|BNODE|VARIABLE) patterns:[pattern] silent:BOOLEAN }
+filter { type:"filter" expression:expression }
+bind { type:"bind" variable:VARIABLE expression:expression }
+values { type:"values" values:[valueBinding] }
+valueBinding {VARIABLE->value}
+value = IRI|BNODE|LITERAL|UNDEFINED;
+
+expression = operation | functionCall | aggregate | IRI | BNODE | LITERAL | VARIABLE;
+operation { type:"operation" operator:(
+   "<="|"="|"<"|">"|"!"|"!="|
+   "&&"|"||"|
+   "+"|"-"|"*"|"/"|
+   "str"|"strlen"|"bound"|"lang"|"langmatches"|"in"|"notin"|"sameterm"|"isiri"|"isblank"|"isliteral"|"regex"|"datatype"|"exists"|"notexists"
+  ) args:[expression|pattern] } # exists
+functionCall { type:"functionCall" function:IRI args:[expression] distinct:BOOLEAN? }
+aggregate { type:"aggregate" expression:expression aggregation:(
+   "count"|"group_concat"|"sum"|"avg"|"min"|"max"
+  ) separator:STRING? distinct:BOOLEAN }
+order { expression:expression descending:BOOLEAN? }
+groupBy { expression:expression }
+
+IRI: "^[a-z]+:"
+BNODE: "^_:"
+LITERAL: ""
+VARIABLE: "^\\?"
+PREFIX: "^[a-zA-Z0-9_-]*$"
+BOOLEAN: "true|false"
+NUMBER: "[0-9]*"
+STRING: ""
+UNDEFINED: "^{undefined}$"
