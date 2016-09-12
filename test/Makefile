@@ -1,6 +1,11 @@
 # uses tests in SPARQL.js and shexTest/shexTest.
 
-test: test.js
+JISON?=../node_modules/jison/lib/cli.js
+
+../lib/jsg.js: ../lib/jsg.jison
+	(cd ../lib/ && $(JISON) $^ -o $@ -p lalr)
+
+test: test.js ../lib/jsg.js
 	mocha test.js
 	(cd ../../SPARQL.js/test/parsedQueries/ && \
 	 (ls *.json | grep -v in.json | xargs \
