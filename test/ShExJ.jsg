@@ -48,9 +48,9 @@ BOOL             : "true" | "false" ; # JSON boolean tokens
 INTEGER          : [+-]? [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-INTEGER>
 DECIMAL          : [+-]? [0-9]* '.' [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-DECIMAL>
 DOUBLE           : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9]+ EXPONENT | [0-9]+ EXPONENT) ; # <http://www.w3.org/TR/turtle/#grammar-production-DOUBLE>
-SIMPLE_LITERAL   : '"' ([^"\\\r\n] | '\\"')* '"' ; # '"' ([^"] | '\\' '"')* '"' # JSON string with '"' at beginning and end
-DATATYPE_LITERAL : SIMPLE_LITERAL "^^" IRI ; # '"' ([^"] | '\\' '"')* '"' '^^' IRI # JSON string with '"' at beginning, an unescaped '"' followed by '^^' and an IRI
-LANG_LITERAL     : SIMPLE_LITERAL LANGTAG ; # '"' ([^"] | '\\' '"')* '"' '@' # <http://www.w3.org/TR/turtle/#grammar-production-LANGTAG> # JSON string with '"' at beginning, an unescaped '"' followed by '@' and a Turtle LANGTAG                   
+SIMPLE_LITERAL   : '"' ([^"\\\r\n] | '\\"')* '"' ; # JSON string with '"' at beginning and end
+DATATYPE_LITERAL : SIMPLE_LITERAL "^^" IRI ; # JSON string with '"' at beginning, an unescaped '"' followed by '^^' and an IRI
+LANG_LITERAL     : SIMPLE_LITERAL LANGTAG ; # JSON string with '"' at beginning, an unescaped '"' followed by '@' and a Turtle LANGTAG                   
 STRING           : .* ;
 
 # Terminals use only in other terminals:

@@ -53,7 +53,7 @@
         return "[" + dive(elt.expr) + "]";
       case "ch":
       case "literal":
-        return elt.val;
+        return elt.val.replace(/([?+*\\])/g, "\\$1");
       case "CCnot":
         return "^" + dive(elt.expr);
       case "esc":
@@ -64,14 +64,15 @@
         var lookFor = elt.ref; if (!lookFor) throw Error("no ref in " + JSON.stringify(elt));
         var refd = m[lookFor]; if (!refd) throw Error(lookFor + " not found");
         compileRegexp(refd, m);
-        return refd.regexp;
+        return refd.pattern;
       default:
         throw Error("unknown elt type: " + JSON.stringify(elt));
 //        console.warn(elt);
       }
     }
     if (!("regexp" in terminal))
-      terminal.regexp = new RegExp(dive(terminal.rule));
+      terminal.pattern = dive(terminal.rule);
+      terminal.regexp = new RegExp("^(" + dive(terminal.rule) + ")$");
   }
 
   function testCharSet (str) {
