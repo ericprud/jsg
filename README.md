@@ -8,7 +8,19 @@ Objects are represented by a production name followed by a "```{```", some name 
 
 | JSON Grammar |  | JSON | |
 --- | --- | --- | ---
-| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm",<br/> "no":123 }``` | if NAME and NUM were defined terminals. |
+| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm", "no":123 }``` | if NAME and NUM were defined terminals. |
+
+By convention, terminals labeled with ALL CAPS.
+
+Object members and their types are expressed as ```memberName```:```type```.
+A type can be a constant, terminal, rule name, or a list of types:
+
+| JSON Grammar |  | JSON | |
+--- | --- | --- | ---
+| ```doc { status:"ready" } ``` | would match | ```{ "status":"ready" }``` |
+| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm", "no":123 }``` |
+| ```doc { street:nameOrTemplate } ``` | would match | ```{ "street":"{Elm}" }``` |
+| ```doc { street:(name|template) } ``` | would match | ```{ "street":"{Elm}" }``` |
 
 ### Parameters
 
