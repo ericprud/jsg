@@ -5,17 +5,17 @@
 doc              : directive* grammarDef
 directive        : ".TYPE" ID ";"
 		 | ".IGNORE" ID* ";"
-grammarDef       : (objectDef | arrayDef | nonObject | terminal)*
+grammarDef       : (objectDef | arrayDef | nonObject | lexerRuleSpec)*
 objectDef        : ID objectExpr
 objectExpr       : '{'  '}'
                  | '{' particle+ ('|' particle*)* '}'
                  | '{' ID '->' propertyType '}'
 arrayDef         : ID arrayExpr
 arrayExpr        : '[' propertyType ('|' propertyType)* ']'
-particle         : ID cardinality? ','?
+particle         : ID ebnfSuffix? ','?
                  | propertyOrGroup ','?
-propertyOrGroup  : ID ':' propertyType cardinality?
-                 | '(' ID ('|' ID)+ ')' ':' propertyType cardinality?
+propertyOrGroup  : ID ':' propertyType ebnfSuffix?
+                 | '(' ID ('|' ID)+ ')' ':' propertyType ebnfSuffix?
                  | '(' propertyOrGroup+ ('|' propertyOrGroup+)+ ')'
 propertyType     : ID
                  | STRING
@@ -23,14 +23,38 @@ propertyType     : ID
                  | arrayExpr
                  | '(' typeAlternatives ')'
 		 | '.'
+
 typeAlternatives : (ID|STRING) ('|' (ID|STRING))+
 nonObject        : ID '=' particle+ ('|' particle*)* ';'
-terminal         : ID ':' STRING ('+' STRING)*
-cardinality      : '?' | '*'
+lexerRuleSpec    : ID ':' lexerRuleBlock ';'
+ebnfSuffix       : '?' | '*' | '+'
+
+# lexer rules from https://github.com/antlr/grammars-v4/raw/master/antlr4/ANTLRv4Parser.g4
+lexerRuleBlock   : lexerAltList
+lexerAltList     : lexerAlt ("|" lexerAlt)*
+lexerAlt         : lexerElements |
+lexerElements    : lexerElement+
+lexerElement     : lexerAtom ebnfSuffix?
+                 | lexerBlock ebnfSuffix?
+lexerBlock       : '(' lexerAltList ')'
+lexerAtom        : terminal
+                 | LEXER_CHAR_SET
+                 | '.'
+terminal         : ID
+                 | STRING
 
 @terminals
 
-ID               : [a-zA-Z_]+
-STRING           : '"' [^"]+ '"'
+ID               : NameStartChar NameChar*
+NameChar: NameStartChar | [0-9] | '_' | [#x00B7] | [#x0300-#x036F] | [#x203F-#x2040]
+NameStartChar: [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD]
+# ignores | [#x10000-#xEFFFF] ;
+
+STRING           : '"' ([^"] | "\\\"")+ '"'
+                 | "'" ([^'] | '\\\'')+ "'"
+
+LEXER_CHAR_SET   : '[' ([^\]] | "\\]")+ ']'
+
+TOKEN_REF        : ID
 @pass            : [ \t\r\n]+
                  | "#" [^\r\n]*
