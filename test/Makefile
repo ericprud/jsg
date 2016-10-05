@@ -8,9 +8,9 @@ JISON?=../node_modules/jison/lib/cli.js
 test: test.js ../lib/jsg.js
 	mocha test.js
 	(cd ../../SPARQL.js/test/parsedQueries/ && \
-	 (ls *.json | grep -v in.json | xargs \
+	 (ls *.json | grep -v in.json | grep -v multiline.json | xargs \
 	  ../../../jsg/lib/cli.js -l ../../../jsg/test/SPARQL.jsg))
-	(cd ../../shexSpec/shexTest && \
+	(cd ../../shexSpec/shexTest ; \
 	 (ls schemas/*.json | grep -v coverage.json | xargs \
 	  ../../jsg/lib/cli.js doc/ShExJ.jsg) && \
          ../../jsg/lib/cli.js doc/ShExR.jsg validation/*.val)
