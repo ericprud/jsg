@@ -5,12 +5,24 @@ JISON?=../node_modules/jison/lib/cli.js
 ../lib/jsg.js: ../lib/jsg.jison
 	(cd ../lib/ && $(JISON) $^ -o $@ -p lalr)
 
-test: test.js ../lib/jsg.js
+test: mochaTests SPARQLTests ShExTests
+
+mochaTests: test.js ../lib/jsg.js
 	mocha test.js
+
+SPARQLTests: test.js ../lib/jsg.js
 	(cd ../../SPARQL.js/test/parsedQueries/ && \
-	 (ls *.json | grep -v in.json | grep -v multiline.json | xargs \
+	 (ls *.json | grep -v in.json | xargs \
 	  ../../../jsg/lib/cli.js -l ../../../jsg/test/SPARQL.jsg))
+
+ShExTests: ShExJTests ShExRTests
+
+ShExJTests: test.js ../lib/jsg.js
 	(cd ../../shexSpec/shexTest ; \
 	 (ls schemas/*.json | grep -v coverage.json | xargs \
-	  ../../jsg/lib/cli.js doc/ShExJ.jsg) && \
+	  ../../jsg/lib/cli.js doc/ShExJ.jsg))
+
+ShExRTests: test.js ../lib/jsg.js
+	(cd ../../shexSpec/shexTest ; \
          ../../jsg/lib/cli.js doc/ShExR.jsg validation/*.val)
+

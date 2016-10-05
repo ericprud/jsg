@@ -32,7 +32,7 @@ deletewhere { updateType:"deletewhere" delete:[pattern] }
 binding { expression:expression variable:VARIABLE }
 pattern = bgp | optional | union | group | minus | graph | service | filter | bind | query | values; # move to where
 bgp { type:"bgp" triples:[triple] }
-triple { subject:(IRI|BNODE|VARIABLE) predicate:predicateOrPath object:(IRI|BNODE|LITERAL|VARIABLE) }
+triple { subject:(IRI|BNODE|VARIABLE) predicate:predicateOrPath object:(IRI|BNODE|RDFLiteral|VARIABLE) }
 predicateOrPath = IRI|VARIABLE|path;
 path { type:"path" pathType:("|"|"/"|"|"|"^"|"+"|"*"|"!") items:[predicateOrPath] }
 optional { type:"optional" patterns:[pattern] }
@@ -45,9 +45,9 @@ filter { type:"filter" expression:expression }
 bind { type:"bind" variable:VARIABLE expression:expression }
 values { type:"values" values:[valueBinding] }
 valueBinding {VARIABLE->value}
-value = IRI|BNODE|LITERAL|UNDEFINED;
+value = IRI|BNODE|RDFLiteral|UNDEFINED;
 
-expression = operation | functionCall | aggregate | IRI | BNODE | LITERAL | VARIABLE;
+expression = operation | functionCall | aggregate | IRI | BNODE | RDFLiteral | VARIABLE;
 operation { type:"operation" operator:(
    "<="|"="|"<"|">"|"!"|"!="|
    "&&"|"||"|
@@ -60,23 +60,24 @@ aggregate { type:"aggregate" expression:expression aggregation:(
   ) separator:STRING? distinct:BOOLEAN }
 order { expression:expression descending:BOOLEAN? }
 groupBy { expression:expression }
+RDFLiteral = SIMPLE_LITERAL | DATATYPE_LITERAL | LANG_LITERAL ;
 
 # Terminals used in productions:
 VARIABLE: "^\\?" ;
 BOOLEAN: "true|false" ;
 NUMBER: "[0-9]*" ;
-LITERAL: STRING | DATATYPE_STRING | LANG_STRING ;
 
-PREFIX           : PN_PREFIX? ':' ; # <http://www.w3.org/TR/turtle/#grammar-production-PNAME_NS> - ":"
+PREFIX           : PN_PREFIX? ; # <http://www.w3.org/TR/turtle/#grammar-production-PNAME_NS> - ":"
 IRI              : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)* ; # <http://www.w3.org/TR/turtle/#grammar-production-IRIREF> - "<>"s
 BNODE            : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)? ; # <http://www.w3.org/TR/turtle/#grammar-production-BLANK_NODE_LABEL>
 BOOL             : "true" | "false" ; # JSON boolean tokens
 INTEGER          : [+-]? [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-INTEGER>
 DECIMAL          : [+-]? [0-9]* '.' [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-DECIMAL>
 DOUBLE           : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9]+ EXPONENT | [0-9]+ EXPONENT) ; # <http://www.w3.org/TR/turtle/#grammar-production-DOUBLE>
-STRING           : '"' ([^"\\\r\n] | '\\"')* '"' ; # '"' ([^"] | '\\' '"')* '"' # JSON string with '"' at beginning and end
-DATATYPE_STRING  : STRING "^^" IRI ; # '"' ([^"] | '\\' '"')* '"' '^^' IRI # JSON string with '"' at beginning, an unescaped '"' followed by '^^' and an IRI
-LANG_STRING      : STRING LANGTAG ; # '"' ([^"] | '\\' '"')* '"' '@' # <http://www.w3.org/TR/turtle/#grammar-production-LANGTAG> # JSON string with '"' at beginning, an unescaped '"' followed by '@' and a Turtle LANGTAG                   
+SIMPLE_LITERAL   : '"' ([^"\\\r\n] | '\\"')* '"' ; # '"' ([^"] | '\\' '"')* '"' # JSON string with '"' at beginning and end
+DATATYPE_LITERAL : SIMPLE_LITERAL "^^" IRI ; # '"' ([^"] | '\\' '"')* '"' '^^' IRI # JSON string with '"' at beginning, an unescaped '"' followed by '^^' and an IRI
+LANG_LITERAL     : SIMPLE_LITERAL LANGTAG ; # '"' ([^"] | '\\' '"')* '"' '@' # <http://www.w3.org/TR/turtle/#grammar-production-LANGTAG> # JSON string with '"' at beginning, an unescaped '"' followed by '@' and a Turtle LANGTAG                   
+STRING           : .* ;
 
 # Terminals use only in other terminals:
 PN_PREFIX        : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)? ;
@@ -90,4 +91,5 @@ PN_CHARS_U       : PN_CHARS_BASE | '_' ;
 UCHAR            : '\\u' HEX HEX HEX HEX
                  | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX ;
 HEX              : [0-9] | [A-F] | [a-f] ;
+EXPONENT 	 : [eE] [+-]? [0-9]+ ;
 LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;

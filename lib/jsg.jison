@@ -28,12 +28,13 @@
   }
 
   function compileRegexp (terminal, m) {
-    debugger;
     //console.warn(JSON.stringify(terminal));
     function dive (elt) {
       switch (elt.type) {
       case "rept":
         return "(" + dive(elt.term) + ")" + elt.count;
+      case "wildcard":
+        return ".";
       case "alt":
         return "(" + elt.elts.map(e => {
           return dive(e);
@@ -74,7 +75,6 @@
   }
 
   function testCharSet (str) {
-    debugger;
     var not = false;
     if (str[0] === "^") {
       not = true;
@@ -376,7 +376,7 @@ lexerBlock:
 lexerAtom:
     terminal    
   | LEXER_CHAR_SET      -> testCharSet($1.substr(1, $1.length - 2))
-  | GT_DOT      { type: "wildcard" }
+  | GT_DOT      -> { type: "wildcard" }
   ;
 
 terminal:
