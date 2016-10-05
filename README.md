@@ -26,12 +26,14 @@ A type can be a constant, terminal, rule name, or a list of types:
 
 ### Rules
 
+Rules are represented by a terminal name followed by a "=", a list of choices, and a ";".
+
 ### Terminals
-Terminals are represented by a terminal name followed by a "```:```" and a PCRE in quotes (this would be nicer with "```//```"s).
+Terminals are represented by a terminal name followed by a ":" and a regular pattern (c.f. lex) nad a ";".
 
 | JSON Grammar |  | JSON |
 --- | --- | --- | ---
-| ```URL : "^[a-z]+://" ``` | would match | ```http://a.example/``` |
+| ```LangRef : '@' [a-zA-Z0-9] MIDCHARS* ``` | would match | ```@ab-cd``` |
 
 ### .Directives
 
