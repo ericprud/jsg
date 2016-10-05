@@ -8,7 +8,7 @@ Objects are represented by a production name followed by a "```{```", some name 
 
 | JSON Grammar |  | JSON | |
 --- | --- | --- | ---
-| ```doc { a:STRING } ``` | would match | ```{ "a":"hi" }``` | if STRING were a defined terminal. |
+| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm",<br/> "no":123 }``` | if NAME and NUM were defined terminals. |
 
 ### Parameters
 
