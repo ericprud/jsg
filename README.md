@@ -3,6 +3,8 @@
 JSON Grammar, or **JSG**, is a language for describing the structure of JSON documents.
 It can be used for documentation, describing what a service or tool consumes or emits, and validation, testing conformance of some data to that description.
 
+See a [simple online demo](https://rawgit.com/ericprud/jsg/master/doc/jsg-simple.html#).
+
 ## Language
 
 A *JSG* schema is composed of objects, rules and values.
