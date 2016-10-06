@@ -1,39 +1,82 @@
-# jsg
-json-grammar - a grammar-based validator for JSON structures
+# json-grammar - a grammar-based validator for JSON structures
+
+JSON Grammar, or **JSG**, is a language for describing the structure of JSON documents.
+It can be used for documentation, describing what a service or tool consumes or emits, and validation, testing conformance of some data to that description.
 
 ## Language
 
-### Objects
-Objects are represented by a production name followed by a "```{```", some name parameters or rule references, and "```}```".
+A *JSG* schema is composed of objects, rules and values.
+Objects are represented by a production name followed by a "```{```", some named members or rule references, and "```}```".
+These describe JSON objects like ```{ "street":"Elm", "number":"123b" }```.
+A member is composed of an attribute name, a ":", and a type: ```{ "street":NAME, "number":NUMBER }```.
+A type can be a constant, value pattern, rule name, or a list of types:
 
-| JSON Grammar |  | JSON | |
---- | --- | --- | ---
-| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm", "no":123 }``` | if NAME and NUM were defined terminals. |
+By convention, value patterns labeled with ALL CAPS.
 
-By convention, terminals labeled with ALL CAPS.
+<table><thead>
+<tr><th>JSON Grammar</th><th>matching JSON</th><th></th></tr>
+</thead><tbody>
+<tr><td><pre>doc { status:"ready" }</pre></td><td><ul>
+<li><code>{ "status":"ready" }</code></li>
+</ul></td><td></td></tr>
+<tr><td><pre>doc { street:NAME no:NUM }
+NAME : .*;
+NUM : [0-9]+[a-e]?;</pre></td><td><ul>
+<li><code>{ "street":"Elm", "no":1 }</code></li>
+<li><code>{ "street":"Elm", "no":123 }</code></li>
+<li><code>{ "street":"Elm", "no":123b }</code></li>
+</ul></td><td></td></tr>
+<tr><td><pre>doc { street:(NAME|"*"|TEMPLATE) }
+NAME : .*;
+TEMPLATE : '{' .* '}';</pre></td><td><ul>
+<li><code>{ "street":"Elm" }</code></li>
+<li><code>{ "street":"*" }</code></li>
+<li><code>{ "street":"{mumble}" }</code></li>
+</ul></td><td></td></tr>
+<tr><td><pre>doc { street:nameOrTemplate }
+nameOrTemplate = NAME | "*" | TEMPLATE
+NAME : .*;
+TEMPLATE : '{' .* '}';</pre></td><td><ul>
+<li><code>{ "street":"Elm" }</code></li>
+<li><code>{ "street":"*" }</code></li>
+<li><code>{ "street":"{mumble}" }</code></li>
+</ul></td><td></td></tr>
+</tbody></table>
 
-Object members and their types are expressed as ```memberName```:```type```.
-A type can be a constant, terminal, rule name, or a list of types:
+A schema can be composed with no rules but rule names can help with:
+* factoring common patterns
+* shortening member types
+* applying semantic names to patterns.
 
-| JSON Grammar |  | JSON | |
---- | --- | --- | ---
-| ```doc { status:"ready" } ``` | would match | ```{ "status":"ready" }``` |
-| ```doc { street:NAME no:NUM } ``` | would match | ```{ "street":"Elm", "no":123 }``` |
-| ```doc { street:nameOrTemplate } ``` | would match | ```{ "street":"{Elm}" }``` |
-| ```doc { street:(name|template) } ``` | would match | ```{ "street":"{Elm}" }``` |
+### Values
+Values are represented by a terminal name followed by a ":" and a regular pattern (c.f. lex) nad a ";".
+They can reference each other (but not circularly) allowing a value to be composed of other values.
+The syntax is reminiscent of EBNF or W3C language specifications, e.g.:
 
-### Parameters
+<table><thead>
+<tr><th>Value pattern</th><th>matching JSON</th><th></th></tr>
+</thead><tbody>
+<tr><td><pre>'@' START+ ('-' MIDCHAR+)*
+START : [a-zA-Z];
+MIDCHAR : START | [0-9];
+NUM : [0-9]+[a-e]?;</pre></td><td><ul>
+<li><code>@en</code></li>
+<li><code>@en-US</code></li>
+<li><code>@de-CH-1901</code></li>
+</ul></td><td></td></tr>
+</tbody></table>
 
-### Rules
+Code points in values can be specified by:
+* a symbol in a quoted string (```'-'```, ```"x-"```, ```'"'```),
+* a symbol in a character range (```[a-z]```)
+* a hexidecimal numeric unicode code point.
 
-Rules are represented by a terminal name followed by a "=", a list of choices, and a ";".
+If we had a disdain for writing the letter '`a`' and the symbol '`@`', we could write the above value pattern as:
 
-### Terminals
-Terminals are represented by a terminal name followed by a ":" and a regular pattern (c.f. lex) nad a ";".
-
-| JSON Grammar |  | JSON |
---- | --- | --- | ---
-| ```LangRef : '@' [a-zA-Z0-9] MIDCHARS* ``` | would match | ```@ab-cd``` |
+<pre>\u0040 START+ ('-' MIDCHAR+)*
+START : [\u0061-z\u0041-Z];
+MIDCHAR : START | [0-9];
+NUM : [0-9]+[\u0061-e]?;</pre>
 
 ### .Directives
 
