@@ -22,9 +22,9 @@ By convention, value patterns labeled with ALL CAPS.
 <tr><td><pre>doc { street:NAME no:NUM }
 NAME : .*;
 NUM : [0-9]+[a-e]?;</pre></td><td><ul>
-<li><code>{ "street":"Elm", "no":1 }</code></li>
-<li><code>{ "street":"Elm", "no":123 }</code></li>
-<li><code>{ "street":"Elm", "no":123b }</code></li>
+<li><code>{ "street":"Elm", "no":"1" }</code></li>
+<li><code>{ "street":"Elm", "no":"123" }</code></li>
+<li><code>{ "street":"Elm", "no":"123b" }</code></li>
 </ul></td><td></td></tr>
 <tr><td><pre>doc { street:(NAME|"*"|TEMPLATE) }
 NAME : .*;
