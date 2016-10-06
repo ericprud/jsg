@@ -69,7 +69,7 @@ NUM : [0-9]+[a-e]?;</pre></td><td><ul>
 Code points in values can be specified by:
 * a symbol in a quoted string (```'-'```, ```"x-"```, ```'"'```),
 * a symbol in a character range (```[a-z]```)
-* a hexidecimal numeric unicode code point.
+* "```\u```" followed by a hexidecimal numeric unicode code point. These can appear in quoted strings and character ranges.
 
 If we had a disdain for writing the letter '`a`' and the symbol '`@`', we could write the above value pattern as:
 
