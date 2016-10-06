@@ -5,6 +5,8 @@
     <title>JSG Simple Online Validator</title>
     <meta name="description" content="simple JSG demo" />
     <style>
+      h1 { font-size: 1.3em; }
+      h1, h1+p, p.status { margin: 0; }
     </style>
 
     <script src="https://www.w3.org/scripts/jquery/2.1/jquery.min.js"></script>
@@ -12,7 +14,13 @@
 
   <body>
 
-    <h1>JSG Simple Online Validator</h1>
+    <div>
+      <h1 style="float:left;">JSG Simple Online Validator</h1>
+      <p style="float:left; padding-left: 1em;">(
+      <a href="https://github.com/ericprud/jsg/blob/master/doc/jsg-simple.js">source</a>, <a href="https://github.com/ericprud/jsg">project</a>
+      )</p>
+      <div style="clear: both;"></div>
+    </div>
 
     <div style="width: 100%;">
       <div id="schema" style="float:left; width: 49%;">

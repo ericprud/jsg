@@ -278,7 +278,7 @@ function validate () {
   var schema = Schema(parsed);
   var data = JSON.parse($("#data textarea").val());
   var errors = schema.validator().validate(data);
-  $("#results").text(errors);
+  $("#results").text(errors.join("\n"));
 }
 
 $("#clear").on("click", clear);
