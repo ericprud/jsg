@@ -19,11 +19,12 @@ function clear () {
 
   $("#data textarea").val("");
   $("#data .status").text(" ");
+  $("#data .passes, #data .fails").hide();
   $("#data .passes p:first").text("");
   $("#data .fails p:first").text("");
   $("#data .passes ul, #data .fails ul").empty();
 
-  $("#results").text("");
+  $("#results").text("").css("border-left", "none");
 }
 
 function pickSchema (name, schemaTest, elt) {
@@ -32,12 +33,13 @@ function pickSchema (name, schemaTest, elt) {
 
   $("#data textarea").val("");
   $("#data .status").text(" ");
+  $("#data .passes, #data .fails").show();
   $("#data .passes p:first").text("Passing:");
   load("#data .passes ul", schemaTest.passes, pickData);
   $("#data .fails p:first").text("Failing:");
   load("#data .fails ul", schemaTest.fails, pickData);
 
-  $("#results").text("");
+  $("#results").text("").css("border-left", "none");
 }
 
 function pickData (name, dataTest, elt) {
@@ -47,14 +49,27 @@ function pickData (name, dataTest, elt) {
 }
 
 function validate () {
-  var schemaText = $("#schema textarea").val();
-  var parsed = parser.parse(schemaText);
-  var schema = Schema(parsed);
-  var data = JSON.parse($("#data textarea").val());
-  var errors = schema.validator().validate(data);
-  $("#results").text(errors.join("\n"));
+  try {
+    var schemaText = $("#schema textarea").val();
+    var parsed = parser.parse(schemaText);
+    var schema = Schema(parsed);
+    var dataText = $("#data textarea").val();
+    if (dataText) {
+      var data = JSON.parse(dataText);
+      var errors = schema.validator().validate(data);
+      if (errors.length)
+        $("#results").text(errors.join("\n")).css("border-left", "thick solid orange");
+      else
+        $("#results").text("data conforms to schema").css("border-left", "thick solid green");
+    } else {
+      $("#results").text("valid schema").css("border-left", "thick solid green");
+    }
+  } catch (e) {
+    $("#results").text(e).css("border-left", "thick solid red");
+  }
 }
 
+$("#data .passes, #data .fails").hide();
 $("#data .passes ul, #data .fails ul").empty();
 $("#validate").on("click", validate);
 $("#clear").on("click", clear);
