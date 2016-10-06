@@ -24,7 +24,7 @@ function clear () {
   $("#data .fails p:first").text("");
   $("#data .passes ul, #data .fails ul").empty();
 
-  $("#results").text("").css("border-left", "none");
+  $("#results").text("").removeClass("passes fails error");
 }
 
 function pickSchema (name, schemaTest, elt) {
@@ -39,7 +39,7 @@ function pickSchema (name, schemaTest, elt) {
   $("#data .fails p:first").text("Failing:");
   load("#data .fails ul", schemaTest.fails, pickData);
 
-  $("#results").text("").css("border-left", "none");
+  $("#results").text("").removeClass("passes fails error");
 }
 
 function pickData (name, dataTest, elt) {
@@ -58,14 +58,18 @@ function validate () {
       var data = JSON.parse(dataText);
       var errors = schema.validator().validate(data);
       if (errors.length)
-        $("#results").text(errors.join("\n")).css("border-left", "thick solid orange");
+        $("#results").text(errors.join("\n")).
+        removeClass("passes error").addClass("fails");
       else
-        $("#results").text("data conforms to schema").css("border-left", "thick solid green");
+        $("#results").text("data conforms to schema").
+        removeClass("fails error").addClass("passes");
     } else {
-      $("#results").text("valid schema").css("border-left", "thick solid green");
+      $("#results").text("valid schema").
+        removeClass("fails error").addClass("passes");
     }
   } catch (e) {
-    $("#results").text(e).css("border-left", "thick solid red");
+    $("#results").text(e).
+      removeClass("passes fails").addClass("error");
   }
 }
 
