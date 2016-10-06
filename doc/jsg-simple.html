@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>JSG Simple Online Validator</title>
+    <meta name="description" content="simple JSG demo" />
+    <style>
+    </style>
+
+    <script src="https://www.w3.org/scripts/jquery/2.1/jquery.min.js"></script>
+  </head>
+
+  <body>
+
+    <h1>JSG Simple Online Validator</h1>
+
+    <div style="width: 100%;">
+      <div id="schema" style="float:left; width: 49%;">
+        <p class="status"> </p>
+        <textarea rows="25" style="width: 100%"></textarea>
+        <div>
+          <div class="examples" style="float:left">
+            <p>Examples:</p>
+            <ul>
+              <li>Javascript is disabled or something went wrong.</li>
+            </ul>
+          </div>
+          <div class="actions" style="float:right">
+            <button id="clear">clear</button> <button id="validate">validate</button>
+          </div>
+        </div>
+            </div>
+      <div style="float:left; width: 1.5%;"><p></p>
+      </div>
+      <div id="data" style="float:left; width: 49%;">
+        <p class="status"> </p>
+        <textarea rows="25" style="width: 100%"></textarea>
+        <div>
+          <div class="passes" style="float:left">
+            <p></p>
+            <ul>
+              <li>This demo is no fun without javascript.</li>
+            </ul>
+          </div>
+          <div class="fails" style="float:left">
+            <p></p>
+            <ul>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <pre id="results" style="clear:both;">
+      </pre>
+    </div>
+    <script>
+      function require (module) {
+        return { inspect: JSON.stringify };
+      }
+      if (typeof Error.captureStackTrace === "undefined")
+        Error.captureStackTrace = function (err, lookFor) {
+          // do nothing
+        }
+    </script>
+    <script src="../lib/jsg.js"></script>
+    <script src="../lib/json-grammar.js"></script>
+    <script src="jsg-simple.js"></script>
+  </body>
+</html>
