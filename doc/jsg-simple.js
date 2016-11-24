@@ -40,11 +40,15 @@ function pickSchema (name, schemaTest, elt) {
   load("#data .fails ul", schemaTest.fails, pickData);
 
   $("#results").text("").removeClass("passes fails error");
+  $("#schema li.selected").removeClass("selected");
+  $(elt).addClass("selected");
 }
 
 function pickData (name, dataTest, elt) {
   $("#data textarea").val(JSON.stringify(dataTest, null, "  "));
   $("#data .status").text(name);
+  $("#data li.selected").removeClass("selected");
+  $(elt).addClass("selected");
   validate();
 }
 
