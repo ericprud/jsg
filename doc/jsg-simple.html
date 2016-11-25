@@ -11,8 +11,16 @@
       .passes { padding-left: .1em; border-left: thick solid green; }
       .fails  { padding-left: .1em; border-left: thick solid orange; }
       .error  { padding-left: .1em; border-left: thick solid red; }
+      #schema textarea { background-color: #f8f8ff; }
       #schema li.selected { background-color: #e8e8ff; }
+      #data textarea { background-color: #f8fff8; }
       #data li.selected { background-color: #e8ffe8; }
+      .status { display: none; } /* disable .status 'cause it's redundant against the selected marker. */
+      #navlist li {
+        display: inline;
+        list-style-type: none;
+        padding-right: 10px;
+      }
     </style>
 
     <script src="https://www.w3.org/scripts/jquery/2.1/jquery.min.js"></script>
@@ -22,9 +30,10 @@
 
     <div>
       <h1 style="float:left;">JSG Simple Online Validator</h1>
-      <p style="float:left; padding-left: 1em;">(
-      <a href="https://github.com/ericprud/jsg/blob/master/doc/jsg-simple.js">source</a>, <a href="https://github.com/ericprud/jsg">project</a>
-      )</p>
+      <ul id="navlist" style="float:left; padding-left: 1em;">
+	<li>‣ source: <a href="https://github.com/ericprud/jsg/blob/master/doc/jsg-simple.js">js</a>, <a href="https://github.com/ericprud/jsg/blob/master/doc/jsg-simple.html">html</a> </li>
+	<il>‣ <a href="https://github.com/ericprud/jsg">project</a></il>
+      </ul>
       <div style="clear: both;"></div>
     </div>
 
@@ -40,7 +49,7 @@
             </ul>
           </div>
           <div class="actions" style="float:right; margin-right: .1em;">
-            <button id="clear">clear</button> <button id="validate">validate</button>
+            <button id="clear">clear</button> <button id="validate">validate (control-enter)</button>
           </div>
         </div>
             </div>

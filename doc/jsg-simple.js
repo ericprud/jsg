@@ -2,54 +2,74 @@
 // Copyright 2016 Eric Prud'hommeux
 // Release under MIT License.
 
-function load (selector, obj, func) {
+function sum (s) { // cheap way to identify identical strings
+  return s.replace(/\s/g, "").split("").reduce(function (a,b){
+    a = ((a<<5) - a) + b.charCodeAt(0);
+    return a&a
+  },0);
+}
+
+function load (selector, obj, func, listItems, side, str) {
   $(selector).empty();
   Object.keys(obj).forEach(k => {
     var li = $('<li><a href="#">' + k + '</li>');
     li.on("click", () => {
-      func(k, obj[k], li);
+      func(k, obj[k], li, listItems, side);
     });
+    listItems[side][sum(str(obj[k]))] = li;
     $(selector).append(li);
   });
 }
 
-function clear () {
-  $("#schema textarea").val("");
-  $("#schema .status").text(" ");
-
+function clearData () {debugger;
   $("#data textarea").val("");
   $("#data .status").text(" ");
+  $("#results").text("").removeClass("passes fails error");
+}
+
+function clearAll () {
+  $("#schema textarea").val("");
+  $("#schema .status").text(" ");
+  $("#schema li.selected").removeClass("selected");
+  clearData();
   $("#data .passes, #data .fails").hide();
   $("#data .passes p:first").text("");
   $("#data .fails p:first").text("");
   $("#data .passes ul, #data .fails ul").empty();
-
-  $("#results").text("").removeClass("passes fails error");
 }
 
-function pickSchema (name, schemaTest, elt) {
-  $("#schema textarea").val(schemaTest.schema);
-  $("#schema .status").text(name);
+function pickSchema (name, schemaTest, elt, listItems, side) {
+  if ($(elt).hasClass("selected")) {
+    clearAll();
+  } else {
+    $("#schema textarea").val(schemaTest.schema);
+    $("#schema .status").text(name);
 
-  $("#data textarea").val("");
-  $("#data .status").text(" ");
-  $("#data .passes, #data .fails").show();
-  $("#data .passes p:first").text("Passing:");
-  load("#data .passes ul", schemaTest.passes, pickData);
-  $("#data .fails p:first").text("Failing:");
-  load("#data .fails ul", schemaTest.fails, pickData);
+    $("#data textarea").val("");
+    $("#data .status").text(" ");
+    $("#data .passes, #data .fails").show();
+    $("#data .passes p:first").text("Passing:");
+    load("#data .passes ul", schemaTest.passes, pickData, listItems, "data", function (o) { return JSON.stringify(o); });
+    $("#data .fails p:first").text("Failing:");
+    load("#data .fails ul", schemaTest.fails, pickData, listItems, "data", function (o) { return JSON.stringify(o); });
 
-  $("#results").text("").removeClass("passes fails error");
-  $("#schema li.selected").removeClass("selected");
-  $(elt).addClass("selected");
+    $("#results").text("").removeClass("passes fails error");
+    $("#schema li.selected").removeClass("selected");
+    $(elt).addClass("selected");
+  }
 }
 
-function pickData (name, dataTest, elt) {
-  $("#data textarea").val(JSON.stringify(dataTest, null, "  "));
-  $("#data .status").text(name);
-  $("#data li.selected").removeClass("selected");
-  $(elt).addClass("selected");
-  validate();
+function pickData (name, dataTest, elt, listItems, side) {
+  if ($(elt).hasClass("selected")) {
+    clearData();
+    $(elt).removeClass("selected");
+  } else {
+    $("#data textarea").val(JSON.stringify(dataTest, null, "  "));
+    $("#data .status").text(name);
+    $("#data li.selected").removeClass("selected");
+    $(elt).addClass("selected");
+    validate();
+  }
 }
 
 function validate () {
@@ -80,7 +100,7 @@ function validate () {
 $("#data .passes, #data .fails").hide();
 $("#data .passes ul, #data .fails ul").empty();
 $("#validate").on("click", validate);
-$("#clear").on("click", clear);
+$("#clear").on("click", clearAll);
 // prepareDemos() is invoked after these variables are assigned:
 var addrSchema, perAddrSchema, shexjSchema;
 
@@ -244,7 +264,48 @@ function prepareDemos () {
       }
     }
   };
-  load("#schema .examples ul", demos, pickSchema);
+  var sums = Object.keys(demos).reduce((ret, schemaName) => {
+    var pair = demos[schemaName];
+    ret.schema[sum(pair.schema)] = schemaName;
+    ["passes", "fails"].forEach(pf => {
+      var dataList = pair[pf];
+      Object.keys(dataList).forEach(dataName => {
+        var data = dataList[dataName];
+        ret.data[sum(JSON.stringify(data))] = [schemaName, pf, dataName];
+      });
+    });
+    return ret;
+  }, {schema:{}, data:{}});
+  console.dir(sums);
+  var listItems = {schema:{}, data:{}};
+  load("#schema .examples ul", demos, pickSchema,
+       listItems, "schema", function (o) {
+         return o.schema;
+       });
+  var timeouts = { schema: undefined, data: undefined };
+  function later (target, side) {
+    if (timeouts[side])
+      clearTimeout(timeouts[side]);
+
+    timeouts[side] = setTimeout(() => {
+      timeouts[side] = undefined;
+      $("#"+side+" .selected").removeClass("selected");
+      var curSum = sum($(target).val());
+      if (curSum in listItems[side])
+        listItems[side][curSum].addClass("selected");
+    }, 250);
+  }
+  $("body").keyup(function (e) {
+    var code = e.keyCode || e.charCode;
+    if(e.ctrlKey && (code === 10 || code === 13)) // standards anyone?
+      $("#validate").click();
+  });
+  $("#schema textarea").keyup(function (e) {
+    later(e.target, "schema");
+  });
+  $("#data textarea").keyup(function (e) {
+    later(e.target, "data");
+  });
 }
 
 // Large constants with demo data which break syntax highlighting:
@@ -316,7 +377,7 @@ PN_CHARS_U       : PN_CHARS_BASE | '_' ;
 UCHAR            : '\\\\u' HEX HEX HEX HEX
                  | '\\\\U' HEX HEX HEX HEX HEX HEX HEX HEX ;
 HEX              : [0-9] | [A-F] | [a-f] ;
-EXPONENT 	 : [eE] [+-]? [0-9]+ ;
+EXPONENT         : [eE] [+-]? [0-9]+ ;
 LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
 `; // '
 
