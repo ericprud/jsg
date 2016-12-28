@@ -1,0 +1,14 @@
+{
+  "type":"Schema",
+  "shapes":{
+    "http://all.example/vs1": {
+      "type": "ShapeAnd",
+      "shapeExprs": [
+        {
+          "type": "NodeConstraint",
+          "datatype": "http://all.example/IRI"
+        }
+      ]
+    }
+  }
+}

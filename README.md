@@ -43,6 +43,13 @@ TEMPLATE : '{' .* '}';</pre></td><td><ul>
 <li><code>{ "street":"*" }</code></li>
 <li><code>{ "street":"{mumble}" }</code></li>
 </ul></td><td></td></tr>
+<tr><td><pre>doc { street:[nameOrTemplate{2,} }
+nameOrTemplate = NAME | "*" | TEMPLATE
+NAME : .*;
+TEMPLATE : '{' .* '}';</pre></td><td><ul>
+<li><code>{ "street":["Elm","X"] }</code></li>
+<li><code>{ "street":["*", "X", "{mumble}"] }</code></li>
+</ul></td><td></td></tr>
 </tbody></table>
 
 A schema can be composed with no rules but rule names can help with:

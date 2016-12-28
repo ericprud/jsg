@@ -1,0 +1,31 @@
+{
+  "type":"Schema",
+  "shapes":{
+    "http://all.example/vs1": {
+      "type": "ShapeAnd",
+      "shapeExprs": [
+        {
+          "type": "NodeConstraint",
+          "values": [
+            "http://a.example/a1",
+            {
+              "type": "StemRange",
+              "stem": "http://all.example/",
+              "exclusions": [
+                {
+                  "type": "Stem",
+                  "stem": "http://all.example/a"
+                },
+                "http://all.example/b"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "NodeConstraint",
+          "datatype": "http://all.example/IRI"
+        }
+      ]
+    }
+  }
+}

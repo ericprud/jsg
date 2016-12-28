@@ -105,6 +105,7 @@
 COMMENT                 ('//'|'#') [^\u000a\u000d]*
 ID                      [a-zA-Z_]+
 STRING                  '"' ([^\"]|'\\"')* '"' | "'" ([^\']|"\\'")* "'"
+INT                     [0-9]+
 DOT_TYPE                '.' [Tt][Yy][Pp][Ee]
 DOT_IGNORE              '.' [Ii][Gg][Nn][Oo][Rr][Ee]
 LEXER_CHAR_SET          '[' ([^\u005c\u005d] | '\\' .)* ']'
@@ -131,8 +132,10 @@ LEXER_CHAR_SET          '[' ([^\u005c\u005d] | '\\' .)* ']'
 {DOT_TYPE}   return 'DOT_TYPE';
 {DOT_IGNORE} return 'DOT_IGNORE';
 "."          return 'GT_DOT';
+","          return 'GT_COMMA';
 {ID}         return 'ID';
 {STRING}     return 'STRING';
+{INT}        return 'INT';
 .            return 'invalid character '+yytext;
 
 /lex
@@ -222,8 +225,11 @@ arrayDef:
     ID arrayExpr        ;
 
 arrayExpr:
-    GT_LBRACKET propertyType _Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star GT_RBRACKET     
-    -> { type: "array", of: $3.length ? { type: "or", exprs: [$2].concat($3) } : $2 }
+    GT_LBRACKET propertyType _Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star _QebnfSuffix_E_Opt GT_RBRACKET     {
+      $$ = { type: "array", of: $3.length ? { type: "or", exprs: [$2].concat($3) } : $2 };
+      if ($4)
+        $$.card = $4;
+    }
   ;
 
 _O_QGT_PIPE_E_S_QpropertyType_E_C:
@@ -239,14 +245,15 @@ _QGT_COMMA_E_Opt:
     
     | GT_COMMA  ;
 
+_QebnfSuffix_E_Opt:
+      -> ""
+    | ebnfSuffix	
+  ;
+
 particle:
       ID _QebnfSuffix_E_Opt     -> { type: "reference", id: $1, card: $2 }
     | propertyOrGroup
   ;
-
-_QebnfSuffix_E_Opt:
-      -> ""
-    | ebnfSuffix        ;
 
 propertyOrGroup:
       ID GT_COLON propertyType _QebnfSuffix_E_Opt       // !!! GT_OPT_OPT 'cause single predicate
@@ -331,7 +338,27 @@ _lexerStart:
 ebnfSuffix:
     GT_OPT      
   | GT_TIMES    
-  | GT_PLUS     
+  | GT_PLUS	
+  | GT_LCURLEY INT _Q_O_QGT_COMMA_E_S_QINT_E_Or_QGT_TIMES_E_Opt_C_E_Opt GT_RCURLEY	-> { min: $2, max: $3 }
+  ;
+
+_O_QINT_E_Or_QGT_TIMES_E_C:
+    INT	
+  | GT_TIMES	-> "*"
+  ;
+
+_Q_O_QINT_E_Or_QGT_TIMES_E_C_E_Opt:
+    	-> "*"
+  | _O_QINT_E_Or_QGT_TIMES_E_C	
+  ;
+
+_O_QGT_COMMA_E_S_QINT_E_Or_QGT_TIMES_E_Opt_C:
+    GT_COMMA _Q_O_QINT_E_Or_QGT_TIMES_E_C_E_Opt	-> $2
+  ;
+
+_Q_O_QGT_COMMA_E_S_QINT_E_Or_QGT_TIMES_E_Opt_C_E_Opt:
+    	-> "*"
+  | _O_QGT_COMMA_E_S_QINT_E_Or_QGT_TIMES_E_Opt_C     
   ;
 
 lexerRuleBlock:

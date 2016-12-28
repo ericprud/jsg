@@ -12,7 +12,12 @@ describe ("", function () {
    ["ShExJ.jsg", "empty.json", true],
    ["ShExJ.jsg", "bad-noType.json", "type"],
    ["ShExJ.jsg", "bad-wrongType.json", false],
-   ["ShExJ.jsg", "bad-unknowProperty.json", "unknownProperty"]].forEach(function (t) {
+   ["ShExJ.jsg", "bad-unknowProperty.json", "unknownProperty"],
+   ["ShExJ.jsg", "ShExJ_ShapeAnd0.json", false],
+   ["ShExJ.jsg", "ShExJ_ShapeAnd1.json", false],
+   ["ShExJ.jsg", "ShExJ_ShapeAnd2.json", true],
+   ["ShExJ.jsg", "ShExJ_ShapeAnd3.json", true]
+  ].forEach(function (t) {
      var schema = Path.join(Testdir, t[0]);
      var data = Path.join(Testdir, t[1]);
      var boolResult = t[2] === true ? "pass" : "fail";
@@ -23,7 +28,7 @@ describe ("", function () {
        p = Parser.parse(FS.readFileSync(schema, "utf8"));
      });
      // console.log(JSON.stringify(p, null, 2));
-     it(`JSG should construct a schema from '{$schema}'.` , function () {
+     it(`JSG should construct a schema from '${schema}'.` , function () {
        s = Schema(p);
      });
      // console.log(s.htmlSerializer().serialize());

@@ -1,0 +1,10 @@
+{
+  "type":"Schema",
+  "shapes":{
+    "http://all.example/vs1": {
+      "type": "ShapeAnd",
+      "shapeExprs": [
+      ]
+    }
+  }
+}

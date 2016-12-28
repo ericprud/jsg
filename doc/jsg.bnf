@@ -11,7 +11,7 @@ objectExpr       : '{'  '}'
                  | '{' particle+ ('|' particle*)* '}'
                  | '{' ID '->' propertyType '}'
 arrayDef         : ID arrayExpr
-arrayExpr        : '[' propertyType ('|' propertyType)* ']'
+arrayExpr        : '[' propertyType ('|' propertyType)* ebnfSuffix? ']'
 particle         : ID ebnfSuffix? ','?
                  | propertyOrGroup ','?
 propertyOrGroup  : ID ':' propertyType ebnfSuffix?
@@ -27,7 +27,7 @@ propertyType     : ID
 typeAlternatives : (ID|STRING) ('|' (ID|STRING))+
 nonObject        : ID '=' particle+ ('|' particle*)* ';'
 lexerRuleSpec    : ID ':' lexerRuleBlock ';'
-ebnfSuffix       : '?' | '*' | '+'
+ebnfSuffix       : '?' | '*' | '+' | "{" INT ("," (INT|"*")?)? "}"
 
 # lexer rules from https://github.com/antlr/grammars-v4/raw/master/antlr4/ANTLRv4Parser.g4
 lexerRuleBlock   : lexerAltList
@@ -52,6 +52,8 @@ NameStartChar: [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02F
 
 STRING           : '"' ([^"] | "\\\"")+ '"'
                  | "'" ([^'] | '\\\'')+ "'"
+
+INT              : [0-9]+
 
 LEXER_CHAR_SET   : '[' ([^\]] | "\\]")+ ']'
 

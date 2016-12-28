@@ -261,6 +261,25 @@ function prepareDemos () {
               }
             }
           }
+        },
+        "short array": {
+          "type": "Schema",
+          "shapes": {
+            "http://a.example/S1": {
+              "type": "Shape",
+              "expression": {
+                "type": "TripleConstraint",
+                "predicate": "http://a.example/p1",
+                "valueExpr": {
+                  "type": "ShapeAnd",
+                  "shapeExprs": [
+//                    { "type": "NodeConstraint", "nodeKind": "bnode" },
+                    { "type": "ShapeRef", "reference": "http://a.example/S1" }
+                  ]
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -312,8 +331,8 @@ shexjSchema = `.TYPE type; # All objects have a type property corresponding to t
 
 Schema           { prefixes:{PREFIX->IRI}? base:IRI? startActs:[SemAct]? start:shapeExpr? shapes:{shapeLabel->shapeExpr}? }
 shapeExpr        = ShapeOr | ShapeAnd | ShapeNot | NodeConstraint | Shape | ShapeRef | ShapeExternal;
-ShapeOr          { shapeExprs:[shapeExpr] }
-ShapeAnd         { shapeExprs:[shapeExpr] }
+ShapeOr          { shapeExprs:[shapeExpr{2,}] }
+ShapeAnd         { shapeExprs:[shapeExpr{2,}] }
 ShapeNot         { shapeExpr:shapeExpr }
 Shape            { virtual:BOOL? closed:BOOL? extra:[IRI]? expression:tripleExpr? inherit:[shapeLabel]? semActs:[SemAct]? }
 ShapeExternal    {  }
