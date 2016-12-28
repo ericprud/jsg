@@ -8,7 +8,7 @@ JISON?=../node_modules/jison/lib/cli.js
 test: mochaTests SPARQLTests ShExTests
 
 mochaTests: test.js ../lib/jsg.js
-	mocha test.js
+	../node_modules/.bin/mocha test.js
 
 SPARQLTests: test.js ../lib/jsg.js
 	(cd ../../SPARQL.js/test/parsedQueries/ && \

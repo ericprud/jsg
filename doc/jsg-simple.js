@@ -75,6 +75,7 @@ function pickData (name, dataTest, elt, listItems, side) {
 function validate () {
   try {
     var schemaText = $("#schema textarea").val();
+    // parser set in ../lib/jsg.js
     var parsed = parser.parse(schemaText);
     var schema = Schema(parsed);
     var dataText = $("#data textarea").val();
@@ -264,19 +265,6 @@ function prepareDemos () {
       }
     }
   };
-  var sums = Object.keys(demos).reduce((ret, schemaName) => {
-    var pair = demos[schemaName];
-    ret.schema[sum(pair.schema)] = schemaName;
-    ["passes", "fails"].forEach(pf => {
-      var dataList = pair[pf];
-      Object.keys(dataList).forEach(dataName => {
-        var data = dataList[dataName];
-        ret.data[sum(JSON.stringify(data))] = [schemaName, pf, dataName];
-      });
-    });
-    return ret;
-  }, {schema:{}, data:{}});
-  console.dir(sums);
   var listItems = {schema:{}, data:{}};
   load("#schema .examples ul", demos, pickSchema,
        listItems, "schema", function (o) {
@@ -382,5 +370,4 @@ LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
 `; // '
 
 prepareDemos();
-
 
