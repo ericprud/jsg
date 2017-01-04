@@ -3,7 +3,7 @@
 # yacker URL: https://www.w3.org/2005/01/yacker/uploads/jsg?lang=perl
 
 doc              : directive* grammarDef
-directive        : ".TYPE" ID ";"
+directive        : ".TYPE" ID ("-" ID+)? ";"
 		 | ".IGNORE" ID* ";"
 grammarDef       : (objectDef | arrayDef | nonObject | lexerRuleSpec)*
 objectDef        : ID objectExpr
