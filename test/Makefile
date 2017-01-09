@@ -15,14 +15,14 @@ SPARQLTests: test.js ../lib/jsg.js
 	 (ls *.json | grep -v in.json | xargs \
 	  ../../../jsg/lib/cli.js -l ../../../jsg/test/SPARQL.jsg))
 
-ShExTests: ShExJTests ShExRTests
+ShExTests: ShExJTests ShExVTests
 
 ShExJTests: test.js ../lib/jsg.js
 	(cd ../../shexSpec/shexTest ; \
 	 (ls schemas/*.json | grep -v coverage.json | xargs \
 	  ../../jsg/lib/cli.js doc/ShExJ.jsg))
 
-ShExRTests: test.js ../lib/jsg.js
+ShExVTests: test.js ../lib/jsg.js
 	(cd ../../shexSpec/shexTest ; \
-         ../../jsg/lib/cli.js doc/ShExR.jsg validation/*.val)
+         ../../jsg/lib/cli.js doc/ShExV.jsg validation/*.val)
 
