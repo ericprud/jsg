@@ -75,8 +75,8 @@ function pickData (name, dataTest, elt, listItems, side) {
 function validate () {
   try {
     var schemaText = $("#schema textarea").val();
-    // parser set in ../lib/jsg.js
-    var parsed = parser.parse(schemaText);
+    // jsg set in ../lib/jsg.js
+    var parsed = jsg.parse(schemaText);
     var schema = Schema(parsed);
     var dataText = $("#data textarea").val();
     if (dataText) {
