@@ -124,6 +124,7 @@ LEXER_CHAR_SET          '[' ([^\u005c\u005d] | '\\' .)* ']'
 "("          return 'GT_LPAREN';
 ")"          return 'GT_RPAREN';
 "->"         return 'GT_MINUS_GT';
+"-"          return 'GT_MINUS';
 "?"          return 'GT_OPT';
 "|"          return 'GT_PIPE';
 "+"          return 'GT_PLUS';
@@ -158,8 +159,23 @@ _Qdirective_E_Star:
   ;
 
 directive:
-    DOT_TYPE ID GT_SEMI -> { discriminator: $2 }
+    DOT_TYPE ID _Q_O_QGT_MINUS_E_S_QID_E_Plus_C_E_Opt GT_SEMI 
+      -> { discriminator: { property: $2, undiscriminated: $3 } }
     | DOT_IGNORE _QID_E_Star GT_SEMI    -> { ignore: $2 }
+  ;
+
+_QID_E_Plus:
+    ID	-> [ $1 ]
+    | _QID_E_Plus ID	-> $1.concat($2)
+  ;
+
+_O_QGT_MINUS_E_S_QID_E_Plus_C:
+    GT_MINUS _QID_E_Plus	-> $2
+  ;
+
+_Q_O_QGT_MINUS_E_S_QID_E_Plus_C_E_Opt:
+      -> [ ]
+    | _O_QGT_MINUS_E_S_QID_E_Plus_C	
   ;
 
 _QID_E_Star:
