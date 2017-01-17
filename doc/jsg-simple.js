@@ -93,7 +93,8 @@ function validate () {
         removeClass("fails error").addClass("passes");
     }
   } catch (e) {
-    $("#results").text(e).
+    var msg = typeof e === "object" && "message" in e ? e.message : e;
+    $("#results").text(msg).
       removeClass("passes fails").addClass("error");
   }
 }
