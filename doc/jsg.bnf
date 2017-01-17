@@ -14,7 +14,7 @@ arrayDef         : ID arrayExpr
 arrayExpr        : '[' propertyType ('|' propertyType)* ebnfSuffix? ']'
 particle         : ID ebnfSuffix? ','?
                  | propertyOrGroup ','?
-propertyOrGroup  : ID ':' propertyType ebnfSuffix?
+propertyOrGroup  : (ID|STRING) ':' propertyType ebnfSuffix?
                  | '(' ID ('|' ID)+ ')' ':' propertyType ebnfSuffix?
                  | '(' propertyOrGroup+ ('|' propertyOrGroup+)+ ')'
 propertyType     : ID

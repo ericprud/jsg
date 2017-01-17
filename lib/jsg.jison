@@ -274,6 +274,8 @@ particle:
 propertyOrGroup:
       ID GT_COLON propertyType _QebnfSuffix_E_Opt       // !!! GT_OPT_OPT 'cause single predicate
       -> { type: "property", id: $1, propertyType: $3, card: $4 }
+    | STRING GT_COLON propertyType _QebnfSuffix_E_Opt       // !!! GT_OPT_OPT 'cause single predicate
+      -> { type: "property", id: $1.substr(1, $1.length-2), propertyType: $3, card: $4 }
     | GT_LPAREN ID _Q_O_QGT_PIPE_E_S_QID_E_C_E_Plus GT_RPAREN GT_COLON propertyType _QebnfSuffix_E_Opt  
       -> { type: "propertyEnumeration", ids: [$2].concat($3), propertyType: $6, card: $7 }
     | GT_LPAREN _resolve_QpropertyOrGroup_E_Plus _Q_O_QGT_PIPE_E_S_QpropertyOrGroup_E_Plus_C_E_Plus GT_RPAREN   
