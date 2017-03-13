@@ -148,7 +148,7 @@ LEXER_CHAR_SET          '[' ([^\u005c\u005d] | '\\' .)* ']'
 %% /* language grammar */
 
 doc:
-    _Qdirective_E_Star grammarDef       {
+    _Qdirective_E_Star _QgrammarElt_E_Star       {
         return makeGrammar($1, $2);
     }
   ;
@@ -156,6 +156,11 @@ doc:
 _Qdirective_E_Star:
       -> { }
     | _Qdirective_E_Star directive      -> extend($1, $2)
+  ;
+
+_QgrammarElt_E_Star:
+      -> [ ]
+    | _QgrammarElt_E_Star grammarElt      -> $1.concat($2)
   ;
 
 directive:
@@ -183,20 +188,11 @@ _QID_E_Star:
     | _QID_E_Star ID    -> $1.concat($2)
   ;
 
-grammarDef:
-    _Q_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_QlexerRuleSpec_E_C_E_Star       
-  ;
-
-_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_QlexerRuleSpec_E_C:
-    objectDef   
+grammarElt:
+      objectDef   
     | arrayDef  
     | nonObject 
     | lexerRuleSpec     
-  ;
-
-_Q_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_QlexerRuleSpec_E_C_E_Star:
-      -> []
-    | _Q_O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_QlexerRuleSpec_E_C_E_Star _O_QobjectDef_E_Or_QarrayDef_E_Or_QnonObject_E_Or_QlexerRuleSpec_E_C        -> $1.concat($2)
   ;
 
 objectDef:
