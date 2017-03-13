@@ -1,7 +1,7 @@
 {
   "type":"Schema",
-  "shapes":{
-    "http://all.example/vs1": {
+  "shapes":[
+    { "id": "http://all.example/vs1",
       "type": "ShapeAnd",
       "shapeExprs": [
         {
@@ -9,11 +9,11 @@
           "values": [
             "http://a.example/a1",
             {
-              "type": "StemRange",
+              "type": "IRIStemRange",
               "stem": "http://all.example/",
               "exclusions": [
                 {
-                  "type": "Stem",
+                  "type": "IRIStem",
                   "stem": "http://all.example/a"
                 },
                 "http://all.example/b"
@@ -27,5 +27,5 @@
         }
       ]
     }
-  }
+  ]
 }
