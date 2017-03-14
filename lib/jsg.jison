@@ -234,7 +234,8 @@ _Q_O_QGT_PIPE_E_S_Qparticle_E_Star_C_E_Star:
   ;
 
 arrayDef:
-    ID arrayExpr        ;
+    ID arrayExpr        -> extend({ id: $1}, $2)
+  ;
 
 arrayExpr:
     GT_LBRACKET propertyType _Q_O_QGT_PIPE_E_S_QpropertyType_E_C_E_Star _QebnfSuffix_E_Opt GT_RBRACKET     {
