@@ -316,6 +316,50 @@ function prepareDemos () {
   });
 }
 
+function prepareInterface () {
+  // don't overwrite if we arrived here from going back for forth in history
+  if ($("#schema textarea").val() !== "" || $("#data textarea").val() !== "")
+    return;
+  var iface = parseQueryString(location.search);
+
+  var QueryParams = [{queryStringParm: "schema", location: $("#schema textarea")},
+                     {queryStringParm: "data", location: $("#data textarea")}];
+  QueryParams.forEach(input => {
+    var parm = input.queryStringParm;
+    if (parm in iface)
+      iface[parm].forEach(text => {
+        input.location.val(input.location.val() + text);
+      });
+  });
+
+  $("h1").on("click", updateURL);
+
+  /**
+   *
+   * location.search: e.g. "?schema=asdf&data=qwer&shape-map=ab%5Ecd%5E%5E_ef%5Egh"
+   */
+  function parseQueryString (query) {
+    if (query[0]==='?') query=query.substr(1); // optional leading '?'
+    var map   = {};
+    query.replace(/([^&,=]+)=?([^&,]*)(?:[&,]+|$)/g, function(match, key, value) {
+      key=decodeURIComponent(key);value=decodeURIComponent(value);
+      (map[key] = map[key] || []).push(value);
+    });
+    return map;
+  };
+
+  /**
+   * update location with a current values of some inputs
+   */
+  function updateURL () {
+    var parms = QueryParams.map(input => {
+      var parm = input.queryStringParm;
+      return parm + "=" + encodeURIComponent(input.location.val());
+    });
+    var s = parms.join("&");
+    window.history.pushState(null, null, location.origin+location.pathname+"?"+s);
+  }
+}
 // Large constants with demo data which break syntax highlighting:
 addrSchema = `address { street:NAME no:NUM? }
 NAME : .*;
@@ -389,5 +433,6 @@ EXPONENT         : [eE] [+-]? [0-9]+ ;
 LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
 `; // '
 
+prepareInterface();
 prepareDemos();
 
