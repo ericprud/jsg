@@ -72,7 +72,7 @@
     }
     if (!("regexp" in terminal))
       terminal.pattern = dive(terminal.rule);
-      terminal.regexp = new RegExp("^(" + dive(terminal.rule) + ")$");
+    terminal.regexp = new RegExp("^(" + dive(terminal.rule) + ")$", "m");
   }
 
   function testCharSet (str) {

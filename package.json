@@ -1,6 +1,6 @@
 {
   "name": "json-grammar",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
   ],
   "author": "Eric Prud'hommeaux <eric.npm@w3.org> (http://www.w3.org/People/Eric/)",
   "license": "MIT",
+  "bin": "lib/cli.js",
   "bugs": {
     "url": "https://github.com/ericprud/jsg/issues"
   },

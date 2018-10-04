@@ -8,7 +8,7 @@ JISON?=../node_modules/jison/lib/cli.js
 test: mochaTests SPARQLTests ShExTests
 
 mochaTests: test.js ../lib/jsg.js
-	../node_modules/.bin/mocha test.js
+	../node_modules/.bin/mocha -R dot test.js
 
 SPARQLTests: test.js ../lib/jsg.js
 	(cd ../../SPARQL.js/test/parsedQueries/ && \
@@ -25,4 +25,6 @@ ShExJTests: test.js ../lib/jsg.js
 ShExVTests: test.js ../lib/jsg.js
 	(cd ../../shexSpec/shexTest ; \
          ../../jsg/lib/cli.js doc/ShExV.jsg validation/*.val)
+	(cd ../../shexSpec/shexTest ; \
+         ../../jsg/lib/cli.js doc/ShExV.jsg validation/*.err)
 
