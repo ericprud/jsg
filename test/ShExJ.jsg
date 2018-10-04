@@ -13,8 +13,10 @@
 ; # All objects have a type property corresponding to the production name, e.g. "Schema"
 
 Schema           {
-#  "@context":"https://shexspec.github.io/context.jsonld"
-startActs:[SemAct+]? start:(shapeExpr|labeledShapeExpr)? shapes:[labeledShapeExpr+]? }
+  "@context":"http://www.w3.org/ns/shex.jsonld"?
+  imports:[IRI+]?
+  startActs:[SemAct+]? start:(shapeExpr|labeledShapeExpr)? shapes:[labeledShapeExpr+]?
+ }
 
 # labeled Shape Expressions
 labeledShapeExpr        = labeledShapeOr | labeledShapeAnd | labeledShapeNot | labeledNodeConstraint | labeledShape | shapeExprLabel | labeledShapeExternal;
@@ -22,7 +24,7 @@ labeledShapeOr          { type:"ShapeOr"        id:shapeExprLabel shapeExprs:[sh
 labeledShapeAnd         { type:"ShapeAnd"       id:shapeExprLabel shapeExprs:[shapeExpr{2,}] }
 labeledShapeNot         { type:"ShapeNot"       id:shapeExprLabel shapeExpr:shapeExpr }
 labeledNodeConstraint   { type:"NodeConstraint" id:shapeExprLabel nodeKind:("iri"|"bnode"|"nonliteral"|"literal")? datatype:IRI? xsFacet* values:[valueSetValue+]? }
-labeledShape            { type:"Shape"          id:shapeExprLabel virtual:BOOL? closed:BOOL? extra:[IRI+]? expression:tripleExpr? inherit:[shapeExprLabel+]? semActs:[SemAct+]? }
+labeledShape            { type:"Shape"          id:shapeExprLabel virtual:BOOL? closed:BOOL? extra:[IRI+]? expression:tripleExpr? inherit:[shapeExprLabel+]? semActs:[SemAct+]? annotations:[Annotation+]? }
 labeledShapeExternal    { type:"ShapeExternal"  id:shapeExprLabel  }
 
 # Shape Expressions
@@ -47,12 +49,15 @@ numericFacet     = (mininclusive|minexclusive|maxinclusive|maxexclusive):numeric
                  | (totaldigits|fractiondigits):INTEGER ;
 
 # Value Sets
-valueSetValue    = objectValue | IRIStem | IRIStemRange | LiteralStem | LiteralStemRange ;
+valueSetValue    = objectValue | IriStem | IriStemRange | LiteralStem | LiteralStemRange | Language | LanguageStem | LanguageStemRange ;
 objectValue      = IRI|ObjectLiteral ;
-IRIStem          { stem:IRI } # IRIStemRange with exclusions
-IRIStemRange     { stem:(IRI|Wildcard) exclusions:[objectValue|IRIStem +]? }
-LiteralStem      { stem:ObjectLiteral } # LiteralStemRange with exclusions
-LiteralStemRange { stem:(ObjectLiteral|Wildcard) exclusions:[objectValue|LiteralStem +]? }
+IriStem          { stem:IRI } # IriStemRange with exclusions
+IriStemRange     { stem:(IRI|Wildcard) exclusions:[objectValue|IriStem +]? }
+LiteralStem      { stem:STRING } # LiteralStemRange with exclusions
+LiteralStemRange { stem:(STRING|Wildcard) exclusions:[objectValue|LiteralStem +]? }
+Language         { languageTag: LANGTAG }
+LanguageStem     { stem:EMPTYLANGTAG }
+LanguageStemRange{ stem:(EMPTYLANGTAG|Wildcard) exclusions:[LANGTAG|LanguageStem +] }
 Wildcard         {  }
 
 SemAct           { name:IRI code:STRING? }
@@ -86,5 +91,5 @@ UCHAR            : '\\u' HEX HEX HEX HEX
                  | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX ;
 HEX              : [0-9] | [A-F] | [a-f] ;
 EXPONENT 	 : [eE] [+-]? [0-9]+ ;
-LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
-
+LANGTAG          : [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
+EMPTYLANGTAG     : (([a-zA-Z])+('-'([a-zA-Z0-9])+)*)? ;

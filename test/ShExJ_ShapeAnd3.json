@@ -9,11 +9,11 @@
           "values": [
             "http://a.example/a1",
             {
-              "type": "IRIStemRange",
+              "type": "IriStemRange",
               "stem": "http://all.example/",
               "exclusions": [
                 {
-                  "type": "IRIStem",
+                  "type": "IriStem",
                   "stem": "http://all.example/a"
                 },
                 "http://all.example/b"
