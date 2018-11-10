@@ -17,7 +17,7 @@ query { type:"query" base:IRI? prefixes:{PREFIX->IRI}? # absent in subqueries
 }
 fromSpec { default:[IRI] named:[IRI] }
 
-update { type:"update" prefixes:{PREFIX->IRI} updates:[updateOp] }
+update { type:"update"? prefixes:{PREFIX->IRI} updates:[updateOp]? }
 updateOp = add|load|copy|move|insert|delete|insertdelete|deletewhere;
 add { type:"add" silent:BOOLEAN? source:graphSpec destination:graphSpec? }
 load { type:"load" silent:BOOLEAN? source:IRI destination:IRI? }
@@ -59,7 +59,7 @@ aggregate { type:"aggregate" expression:expression aggregation:(
    "count"|"group_concat"|"sum"|"avg"|"min"|"max"
   ) separator:STRING? distinct:BOOLEAN }
 order { expression:expression descending:BOOLEAN? }
-groupBy { expression:expression }
+groupBy { expression:expression variable:VARIABLE? }
 RDFLiteral = SIMPLE_LITERAL | DATATYPE_LITERAL | LANG_LITERAL ;
 
 # Terminals used in productions:
