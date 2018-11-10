@@ -102,3 +102,31 @@ NUM : [0-9]+[\u0061-e]?;</pre>
 | ```.TYPE type; doc { a:STRING } STRING=".*"```    |fails | ```{ "type":"docXXX", "a":"hi" }``` |
 You can push the .TYPE property into each object if you want (and have to if it's not universal).
 Error reports on schemas with a .TYPE directive tend to be terser as failing a discriminator check shortcuts the tests of all the other object properties.
+
+# Contributing
+
+All PRs welcome. Please run tests first:
+
+## Testing
+
+JSG has a set of built-in tests. It also tests JSON structures from the [ShEx](https://github.com/shexSpec/shexTest/tree/master/schemas) and [SPARQL.js](https://github.com/RubenVerborgh/SPARQL.js/tree/master/test/parsedQueries) repositories. This presumes specific paths between where these are checked out. You can accomplish this by checking everything out in a directory, e.g. `github`:
+
+```
+mkdir github
+cd github
+git clone git@github.com:shexSpec/shexTest shexSpec/shexTest
+git clone git@github.com:RubenVerborgh/SPARQL.js RubenVerborgh/SPARQL.js
+# now to get JSG, initialize it and run the tests:
+git clone git@github.com:ericprud/jsg ericprud/jsg
+cd ericprud/jsg
+npm install
+npm run test-all
+```
+
+`test/test.js` has an easy way to enter passing and failing tests, e.g.
+```
+   ["ShExJ.jsg", "empty.json", true],
+   ["ShExJ.jsg", "bad-noType.json", "type"],
+   ["ShExJ.jsg", "bad-wrongType.json", false],
+```
+which tests that `empty.json` passes, `bad-noType.json` fails with an error mentioning "type" and `bad-wrongType.json` fails for some reason.

@@ -4,7 +4,8 @@
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "test-all": "(cd test/ && make test)"
   },
   "repository": {
     "type": "git",
