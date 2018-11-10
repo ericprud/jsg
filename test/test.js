@@ -16,7 +16,8 @@ describe ("", function () {
    ["ShExJ.jsg", "ShExJ_ShapeAnd0.json", false],
    ["ShExJ.jsg", "ShExJ_ShapeAnd1.json", false],
    ["ShExJ.jsg", "ShExJ_ShapeAnd2.json", true],
-   ["ShExJ.jsg", "ShExJ_ShapeAnd3.json", true]
+   ["ShExJ.jsg", "ShExJ_ShapeAnd3.json", true],
+   ["WikidataUpdate.jsg", "WikidataUpdate-Q20729.json", true]
   ].forEach(function (t) {
      var schema = Path.join(Testdir, t[0]);
      var data = Path.join(Testdir, t[1]);

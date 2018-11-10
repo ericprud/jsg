@@ -1,0 +1,68 @@
+Update { entities: {QID->Entity} }
+Entity {
+  pageid: INTEGER
+  ns: INTEGER
+  title: QID
+  lastrevid: INTEGER
+  modified: DATETIME
+  type: "item"
+  id: QID
+  labels: {LANGTAG->LangDescr}
+  descriptions: {LANGTAG->LangDescr}
+  aliases: {LANGTAG->AliasList}
+  claims: PropertyMap
+  sitelinks: { STRING->Site}
+}
+AliasList [LangDescr]
+LangDescr { language: LANGTAG value: STRING }
+Site { site:STRING title:STRING badges:[Badge] url:STRING }
+Badge {} # no badges in example
+
+PropertyMap {PID->StatementList}
+StatementList [Statement]
+Statement {
+  mainsnak:Snak
+  type:"statement"
+  qualifiers: SnakMap?
+  "qualifiers-order":[PID]?
+  id:STRING
+  rank:("normal"|"preferred")
+  references:[Reference]?
+}
+SnakMap {PID->SnakList}
+SnakList [Snak]
+Snak {
+  snaktype: "value"
+  property: PID
+  hash: STRING?
+  datavalue: dataValue
+  datatype: ("wikibase-item"|"url"|"time"|"string"|"monolingualtext"|"commonsMedia"|"external-id"|"quantity")
+}
+dataValue = EntRef | Time | StringVal | MonoText | Quantity;
+EntRef { value:EntRefA type:"wikibase-entityid" }
+EntRefA { "entity-type":"item" "numeric-id": INTEGER id:QID }
+StringVal { value:STRING type:"string" }
+Quantity { value:QuantityA type:"quantity" }
+QuantityA { amount:STRING unit:STRING }
+
+Reference {hash:STRING snaks:SnakMap "snaks-order":[PID]}
+MonoText { value: MonoTextA type:"monolingualtext" }
+MonoTextA { text:STRING language:LANGTAG }
+Time {value:TimeA type:"time"}
+TimeA {
+  time: STRING
+  timezone: INTEGER
+  before: INTEGER
+  after: INTEGER
+  precision: INTEGER
+  calendarmodel: STRING
+}
+
+PID: 'P' [0-9]+;
+QID: 'Q' [0-9]+;
+STRING : .*;
+NUM : [0-9]+[a-e]?;
+TIME: [0-9:-]+;
+INTEGER: [0-9]+;
+DATETIME: [0-9][0-9][0-9][0-9]'-'[0-9][0-9]'-'[0-9][0-9]'T'[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9]'Z';
+LANGTAG: [a-z][a-z]('-'[a-z]+)*;
