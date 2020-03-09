@@ -136,7 +136,7 @@
                       "nodeKind": "iri"
                     },
                     "min": 0,
-                    "max": "unbounded"
+                    "max": -1
                   },
                   {
                     "type": "TripleConstraint",
@@ -148,7 +148,7 @@
                       "length": 5
                     },
                     "min": 1,
-                    "max": "unbounded"
+                    "max": -1
                   },
                   {
                     "type": "TripleConstraint",
@@ -173,7 +173,7 @@
                   ]
                 },
                 "min": 2,
-                "max": "unbounded"
+                "max": -1
               },
               {
                 "type": "TripleConstraint",
@@ -205,7 +205,7 @@
                   ]
                 },
                 "min": 2,
-                "max": "unbounded"
+                "max": -1
               },
               {
                 "type": "EachOf",
@@ -309,7 +309,7 @@
                               "nodeKind": "literal"
                             },
                             "min": 1,
-                            "max": "unbounded",
+                            "max": -1,
                             "semActs": [
                               {
                                 "type": "SemAct",
@@ -350,7 +350,7 @@
                             "inverse": true,
                             "predicate": "http://all.example/bnode",
                             "min": 1,
-                            "max": "unbounded",
+                            "max": -1,
                             "semActs": [
                               {
                                 "type": "SemAct",
@@ -364,7 +364,7 @@
                             "inverse": true,
                             "predicate": "http://all.example/literal",
                             "min": 1,
-                            "max": "unbounded",
+                            "max": -1,
                             "semActs": [
                               {
                                 "type": "SemAct",
@@ -439,29 +439,6 @@
         "http://all.example/prefix",
         "http://all.example/base"
       ]
-    },
-    {
-      "id": "http://all.example/S5",
-      "type": "NodeConstraint",
-      "nodeKind": "iri"
-    },
-    {
-      "id": "_:a·̀ͯ‿.⁀",
-      "type": "Shape",
-      "closed": true,
-      "expression": {
-        "id": "_:a·̀ͯ‿.⁀e",
-        "type": "EachOf",
-        "expressions": [
-          "_:a·̀ͯ‿.⁀e",
-          "http://all.example/S2e"
-        ]
-      }
-    },
-    {
-      "id": "_:AZazÀÖØöø˿ͰͽͿ῿‌‍⁰↏Ⰰ⿯、퟿豈﷏ﷰ�𐀀󯿽",
-      "type": "Shape",
-      "expression": "_:a·̀ͯ‿.⁀e"
     }
   ]
 }
