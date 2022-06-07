@@ -53,9 +53,9 @@ operation { type:"operation" operator:(
    "&&"|"||"|
    "+"|"-"|"*"|"/"|
    "str"|"strlen"|"bound"|"lang"|"langmatches"|"in"|"notin"|"sameterm"|"isiri"|"isblank"|"isliteral"|"regex"|"datatype"|"exists"|"notexists"
-  ) args:[expression|pattern] } # exists
+  ) args:[expression|pattern|STRING] } # exists
 functionCall { type:"functionCall" function:IRI args:[expression] distinct:BOOLEAN? }
-aggregate { type:"aggregate" expression:expression aggregation:(
+aggregate { type:"aggregate" expression:(expression|STAR) aggregation:(
    "count"|"group_concat"|"sum"|"avg"|"min"|"max"
   ) separator:STRING? distinct:BOOLEAN }
 order { expression:expression descending:BOOLEAN? }
@@ -95,3 +95,4 @@ UCHAR            : '\\u' HEX HEX HEX HEX
 HEX              : [0-9] | [A-F] | [a-f] ;
 EXPONENT         : [eE] [+-]? [0-9]+ ;
 LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
+UNDEFINED        : '{undefined}' ;

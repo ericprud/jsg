@@ -3,7 +3,7 @@
 JISON?=../node_modules/jison/lib/cli.js
 
 ../lib/jsg.js: ../lib/jsg.jison
-	(cd ../lib/ && $(JISON) $^ -o $@ -p lalr)
+	(cd ../lib/ && make jsg.js)
 
 test: mochaTests SPARQLTests ShExTests
 

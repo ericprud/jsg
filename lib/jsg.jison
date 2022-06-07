@@ -50,10 +50,35 @@
       case "CCrange":
         return dive(elt.from) + "-" + dive(elt.to);
       case "charset":
+        // special handling for multi-char (surrogate) ranges
+        if (elt.expr.type === "CCrange"
+            && ("vals" in elt.expr.from || "vals" in elt.expr.to)) {
+          if (!("vals" in elt.expr.from) || !("vals" in elt.expr.to))
+            throw Error("Not programmed for multi-length character range "
+                        + JSON.stringify(elt.expr.from) + "-" + JSON.stringify(elt.expr.to)
+                        + "\n  rephrase as e.g. [\\uF000-\\uFFEF][\\u10000-\\uEFFFF]");
+          return "[" + dive({type: "hex", val: elt.expr.from.vals[0]}) + "-" + dive({type: "hex", val: elt.expr.to.vals[0]}) + "]"
+            + "[" + dive({type: "hex", val: elt.expr.from.vals[1]}) + "-" + dive({type: "hex", val: elt.expr.to.vals[1]}) + "]";
+        }
         return "[" + dive(elt.expr) + "]";
       case "ch":
       case "literal":
-        return elt.val.replace(/([?+*\\])/g, "\\$1");
+        if (elt.val.length === 0)
+          return '';
+        return elt.val.match(/(?:\\(?:u[0-9a-fA-F]+|[\\bnrt])|[^\\])(?:-(?:\\(?:u[0-9a-fA-F]+|[\\bnrt])|[^\\]))?/g).map(s => {
+          var r = s.match(/(?:\\(?:u([0-9a-fA-F]+)|([\\bnrt]))|([^\\]))(?:(-)(?:\\(?:u([0-9a-fA-F]+)|([\\bnrt]))|([^\\])))?/);
+          var a = atom(r[1], r[2], r[3]);
+          switch (a.type) {
+          case 'ch': return a.val.replace(/([?+*\\\.^$])/g, "\\$1");
+          case 'esc': return "\\" + a.val;
+          case 'hex':
+            if ("vals" in a)
+              return a.vals.map(v => "\\u" + v).join('');
+            else
+              return "\\u" + a.val;
+          default: throw Error("unknown atom type: " + a.type)
+          }
+        }).join('');
       case "CCnot":
         return "^" + dive(elt.expr);
       case "esc":
@@ -75,6 +100,20 @@
     terminal.regexp = new RegExp("^(" + dive(terminal.rule) + ")$", "m");
   }
 
+  function atom (hex, esc, ch) {
+    if (hex) {
+      const cp = parseInt(hex, 16)
+      if (cp > 0xffff) {
+        const s = String.fromCodePoint(cp);
+        const cpz = [0, 1].map(i => s.charCodeAt(i).toString(16));
+        return { type: "hex", vals: cpz };
+      }
+    }
+    return hex ? { type: "hex", val: hex } :
+    esc ? { type: "esc", val: esc } :
+    { type: "ch", val: ch };
+  }
+
   function testCharSet (str) {
     var not = false;
     if (str[0] === "^") {
@@ -83,11 +122,6 @@
     }
     var ranges = str.match(/(?:\\(?:u[0-9a-fA-F]+|[\\bnrt])|[^\\])(?:-(?:\\(?:u[0-9a-fA-F]+|[\\bnrt])|[^\\]))?/g).map(s => {
       var r = s.match(/(?:\\(?:u([0-9a-fA-F]+)|([\\bnrt]))|([^\\]))(?:(-)(?:\\(?:u([0-9a-fA-F]+)|([\\bnrt]))|([^\\])))?/);
-      function atom (hex, esc, ch) {
-        return hex ? { type: "hex", val: hex } :
-        esc ? { type: "esc", val: esc } :
-        { type: "ch", val: ch };
-      }
       var from = atom(r[1], r[2], r[3]);
       var ret = r[4] ? { type: "CCrange", from: from, to: atom(r[5], r[6], r[7]) } : from;
       return ret;
@@ -103,7 +137,7 @@
 %s lexer
 
 COMMENT                 ('//'|'#') [^\u000a\u000d]*
-ID                      [a-zA-Z_]+
+ID                      [a-zA-Z_][a-zA-Z_0-9]*
 STRING                  '"' ([^\"]|'\\"')* '"' | "'" ([^\']|"\\'")* "'"
 INT                     [0-9]+
 DOT_TYPE                '.' [Tt][Yy][Pp][Ee]
