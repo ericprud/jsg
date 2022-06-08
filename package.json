@@ -4,7 +4,9 @@
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
+    "patch": "npm run test && release-it patch",
     "minor": "npm run test && release-it minor",
+    "major": "npm run test && release-it major",
     "test": "mocha",
     "test-all": "(cd test/ && make test)"
   },
