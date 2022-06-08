@@ -4,8 +4,15 @@
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
+    "minor": "npm run test && release-it minor",
     "test": "mocha",
     "test-all": "(cd test/ && make test)"
+  },
+  "hooks": {
+    "before:init": ["npm test"],
+    "after:bump": "echo bumping",
+    "after:git:release": "echo After git push, before github release",
+    "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
   },
   "repository": {
     "type": "git",
@@ -32,6 +39,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "jison": "^0.4.18",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "release-it": "^15.0.0"
   }
 }
