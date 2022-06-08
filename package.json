@@ -1,6 +1,6 @@
 {
   "name": "json-grammar",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,9 @@
     "test-all": "(cd test/ && make test)"
   },
   "hooks": {
-    "before:init": ["npm test"],
+    "before:init": [
+      "npm test"
+    ],
     "after:bump": "echo bumping",
     "after:git:release": "echo After git push, before github release",
     "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
