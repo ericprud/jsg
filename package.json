@@ -1,6 +1,6 @@
 {
   "name": "json-grammar",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Grammar-based description and validation of JSON structures.",
   "main": "index.js",
   "scripts": {
