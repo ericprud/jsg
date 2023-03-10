@@ -149,62 +149,208 @@ function prepareDemos () {
     "ShExJ": {
       schema: shexjSchema,
       passes: {
-        "1card25":{
-          "type": "Schema",
-          "shapes":{
-            "http://a.example/S1": {
-              "type": "Shape",
-              "expression": {
-                "type": "TripleConstraint",
-                "predicate": "http://a.example/p1",
-                "min": 2, "max": 5
+        "ClinObs":
+{
+  "@context": "http://www.w3.org/ns/shex.jsonld",
+  "type": "Schema",
+  "start": "http://schema.example/ObservationShape",
+  "shapes": [
+    {
+      "type": "ShapeDecl",
+      "id": "http://schema.example/ObservationShape",
+      "shapeExpr": {
+        "type": "Shape",
+        "expression": {
+          "type": "EachOf",
+          "expressions": [
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://hl7.org/fhir/status",
+              "valueExpr": {
+                "type": "NodeConstraint",
+                "values": [
+                  { "value": "preliminary" },
+                  { "value": "final" }
+                ]
               }
+            },
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://hl7.org/fhir/subject",
+              "valueExpr": "http://schema.example/PatientShape"
             }
-          }
-        },
-        "1bnodeRefORRefMinlength": {
-          "type": "Schema",
-          "shapes": {
-            "http://a.example/S1": {
-              "type": "Shape",
-              "expression": {
-                "type": "TripleConstraint",
-                "predicate": "http://a.example/p1",
-                "valueExpr": {
-                  "type": "ShapeOr",
-                  "shapeExprs": [
+          ]
+        }
+      }
+    },
+    {
+      "type": "ShapeDecl",
+      "id": "http://schema.example/PatientShape",
+      "shapeExpr": {
+      "type": "Shape",
+        "expression": {
+          "type": "EachOf",
+          "expressions": [
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://hl7.org/fhir/name",
+              "valueExpr": {
+                "type": "NodeConstraint",
+                "datatype": "http://www.w3.org/2001/XMLSchema#string"
+              },
+              "min": 0, "max": -1
+            },
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://hl7.org/fhir/birthdate",
+              "valueExpr": {
+                "type": "NodeConstraint",
+                "datatype": "http://www.w3.org/2001/XMLSchema#date"
+              },
+              "min": 0, "max": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+,
+        "IssueShape-EXTENDS":
+{
+  "type": "Schema",
+  "shapes": [
+    {
+      "type": "ShapeDecl",
+      "id": "http://a.example/IssueShape",
+      "shapeExpr": {
+        "type": "Shape",
+        "closed": true,
+        "expression": {
+          "type": "EachOf",
+          "expressions": [
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://ex.example/#reportedBy",
+              "valueExpr": "http://a.example/PersonShape"
+            },
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://ex.example/#reproducedBy",
+              "valueExpr": "http://a.example/EmployeeShape",
+              "min": 0,
+              "max": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "ShapeDecl",
+      "id": "http://a.example/PersonShape",
+      "abstract": true,
+      "shapeExpr": {
+        "type": "Shape",
+        "expression": {
+          "type": "EachOf",
+          "expressions": [
+            {
+              "type": "OneOf",
+              "expressions": [
+                {
+                  "type": "TripleConstraint",
+                  "predicate": "http://xmlns.com/foaf/name",
+                  "valueExpr": {
+                    "type": "NodeConstraint",
+                    "datatype": "http://www.w3.org/2001/XMLSchema#string"
+                  }
+                },
+                {
+                  "type": "EachOf",
+                  "expressions": [
                     {
-                      "type": "ShapeAnd",
-                      "shapeExprs": [
-                        {
-                          "type": "NodeConstraint",
-                          "nodeKind": "bnode"
-                        },
-                        {
-                          "type": "ShapeRef",
-                          "reference": "http://a.example/S1"
-                        }
-                      ]
+                      "type": "TripleConstraint",
+                      "predicate": "http://xmlns.com/foaf/givenName",
+                      "valueExpr": {
+                        "type": "NodeConstraint",
+                        "datatype": "http://www.w3.org/2001/XMLSchema#string"
+                      },
+                      "min": 1,
+                      "max": -1
                     },
                     {
-                      "type": "ShapeAnd",
-                      "shapeExprs": [
-                        {
-                          "type": "NodeConstraint",
-                          "minlength": 5
-                        },
-                        {
-                          "type": "ShapeRef",
-                          "reference": "http://a.example/S1"
-                        }
-                      ]
+                      "type": "TripleConstraint",
+                      "predicate": "http://xmlns.com/foaf/familyName",
+                      "valueExpr": {
+                        "type": "NodeConstraint",
+                        "datatype": "http://www.w3.org/2001/XMLSchema#string"
+                      }
                     }
                   ]
                 }
+              ]
+            },
+            {
+              "type": "TripleConstraint",
+              "predicate": "http://xmlns.com/foaf/mbox",
+              "valueExpr": {
+                "type": "NodeConstraint",
+                "nodeKind": "iri"
               }
             }
-          }
+          ]
         }
+      }
+    },
+    {
+      "type": "ShapeDecl",
+      "id": "http://a.example/UserShape",
+      "shapeExpr": {
+        "type": "Shape",
+        "extends": [
+          "http://a.example/PersonShape"
+        ],
+        "closed": true,
+        "expression": {
+          "type": "TripleConstraint",
+          "predicate": "http://ex.example/#representative",
+          "valueExpr": "http://a.example/EmployeeShape"
+        }
+      }
+    },
+    {
+      "type": "ShapeDecl",
+      "id": "http://a.example/RepShape",
+      "abstract": true,
+      "shapeExpr": {
+        "type": "Shape",
+        "expression": {
+          "type": "TripleConstraint",
+          "predicate": "http://xmlns.com/foaf/phone",
+          "valueExpr": {
+            "type": "NodeConstraint",
+            "nodeKind": "iri"
+          },
+          "min": 1,
+          "max": -1
+        }
+      }
+    },
+    {
+      "type": "ShapeDecl",
+      "id": "http://a.example/EmployeeShape",
+      "shapeExpr": {
+        "type": "Shape",
+        "extends": [
+          "http://a.example/PersonShape",
+          "http://a.example/RepShape"
+        ],
+        "closed": true
+      }
+    }
+  ],
+  "@context": "http://www.w3.org/ns/shex.jsonld"
+}
       },
       fails: {
         "misplaced attr":{
@@ -372,66 +518,152 @@ NAME : .*;
 NUM : [0-9]+[a-e]?;
 `;
 
-shexjSchema = `.TYPE type; # All objects have a type property corresponding to the production name, e.g. "Schema"
+shexjSchema = `# This is a JSON Grammar (JSG) file for the ShEx JSON format.
+# The form "OBJNAME  { property:PROPTYPE ... }" matches an object of type OBJTYPE
+# The form "RULENAME = NAME1 | NAME2 ..." matches any of NAMEn.
+# the form "TERMNAME : "RegExp" matches any literal matching RegExp
+# A PROPTYPE can be:
+#   TERMINAL - a terminal, all caps in this example.
+#   [PROPTYPE] - an array of PROPTYPE.
+#   {TERMINAL->PROPTYPE} - a map from TERMINAL to PROPTYPE.
+#   (PROPTYPE1 | PROPTYPE2...) - any of PROPTYPEn.
 
-Schema           { prefixes:{PREFIX->IRI}? base:IRI? startActs:[SemAct]? start:shapeExpr? shapes:{shapeLabel->shapeExpr}? }
-shapeExpr        = ShapeOr | ShapeAnd | ShapeNot | NodeConstraint | Shape | ShapeRef | ShapeExternal;
-ShapeOr          { shapeExprs:[shapeExpr{2,}] }
-ShapeAnd         { shapeExprs:[shapeExpr{2,}] }
-ShapeNot         { shapeExpr:shapeExpr }
-Shape            { virtual:BOOL? closed:BOOL? extra:[IRI]? expression:tripleExpr? inherit:[shapeLabel]? semActs:[SemAct]? }
-ShapeExternal    {  }
-ShapeRef         { reference:IRI } # should be a TERM or some such
-SemAct           { name:IRI code:STRING? }
-tripleExpr       = EachOf | SomeOf | TripleConstraint | Inclusion ;
-EachOf           { expressions:[tripleExpr] min:INTEGER? max:(INTEGER|"*")? semActs:[SemAct]? annotations:[Annotation]? }
-SomeOf           { expressions:[tripleExpr] min:INTEGER? max:(INTEGER|"*")? semActs:[SemAct]? annotations:[Annotation]? }
-Inclusion        { include:shapeLabel }
-TripleConstraint { inverse:BOOL? negated:BOOL? predicate:IRI valueExpr:shapeExpr? min:INTEGER? max:(INTEGER|"*")? semActs:[SemAct]? annotations:[Annotation]? }
-NodeConstraint   { nodeKind:("iri"|"bnode"|"nonliteral"|"literal")? datatype:IRI? xsFacet* values:[valueSetValue]? }
-Annotation       { predicate:IRI object:objectValue }
+# All objects have a type property corresponding to the production name, e.g. "Schema"
+.TYPE type - ObjectLiteral;
 
+Schema           {
+  "@context":"http://www.w3.org/ns/shex.jsonld" ?
+  imports:[IRIREF+] ?
+  startActs:[SemAct+] ?
+  start:shapeExprOrRef ?
+  shapes:[ShapeDecl+] ?
+}
+ShapeDecl        {
+  id:shapeDeclLabel
+  abstract:BOOL ?
+  restricts:[shapeExprOrRef+] ?
+  shapeExpr:shapeExpr
+}
+
+// Shape Expressions
+shapeExpr        = ShapeOr | ShapeAnd | ShapeNot | NodeConstraint | Shape | ShapeExternal;
+shapeExprOrRef   = shapeExpr | shapeDeclRef;
+ShapeOr          { shapeExprs:[shapeExprOrRef{2,}] }
+ShapeAnd         { shapeExprs:[shapeExprOrRef{2,}] }
+ShapeNot         { shapeExpr:shapeExprOrRef }
+shapeDeclRef     = shapeDeclLabel ;
+shapeDeclLabel   = IRIREF | BNODE ;
+NodeConstraint   {
+  nodeKind:("iri"|"bnode"|"nonliteral"|"literal") ?
+  datatype:IRIREF ?
+  xsFacet *
+  values:[valueSetValue+] ?
+}
+ShapeExternal    { }
+
+# XML Schema facets
 xsFacet          = stringFacet | numericFacet ;
-stringFacet      = (length|minlength|maxlength):INTEGER | pattern:STRING ;
+stringFacet      = (length|minlength|maxlength):INTEGER | pattern:STRING flags:STRING? ;
 numericFacet     = (mininclusive|minexclusive|maxinclusive|maxexclusive):numericLiteral
                  | (totaldigits|fractiondigits):INTEGER ;
-shapeLabel       = IRI|BNODE ;
-numericLiteral   = INTEGER|DECIMAL|DOUBLE ;
-valueSetValue    = objectValue|Stem|StemRange ;
-objectValue      = IRI|RDFLiteral ;
-Stem             { stem:IRI } # StemRange with exclusions
-StemRange        { stem:(IRI|Wildcard) exclusions:[valueSetValue]? }
+
+numericLiteral   = INTEGER | DECIMAL | DOUBLE ;
+
+# Value Sets
+valueSetValue    = objectValue | IriStem | IriStemRange | LiteralStem
+                 | LiteralStemRange | Language | LanguageStem | LanguageStemRange ;
+objectValue      = IRIREF | ObjectLiteral ;
+ObjectLiteral    { value:STRING language:STRING? type:STRING? }
+IriStem          { stem:IRIREF } # IriStemRange with exclusions
+IriStemRange     { stem:(IRIREF | Wildcard) exclusions:[IRIREF | IriStem+]? }
+LiteralStem      { stem:STRING } # LiteralStemRange with exclusions
+LiteralStemRange { stem:(STRING | Wildcard) exclusions:[STRING | LiteralStem+] }
+Language         { languageTag: LANGTAG }
+LanguageStem     { stem:(LANGTAG | EMPTY) }
+LanguageStemRange{ stem:(LANGTAG | EMPTY | Wildcard) exclusions:[LANGTAG | LanguageStem+] }
 Wildcard         {  }
-RDFLiteral       = SIMPLE_LITERAL|DATATYPE_LITERAL|LANG_LITERAL ;
+
+Shape            {
+  abstract:BOOL ?
+  closed:BOOL ?
+  extends:[shapeExprOrRef+] ?
+  extra:[IRIREF+] ?
+  expression:tripleExprOrRef ?
+  semActs:[SemAct+] ?
+  annotations:[Annotation+] ?
+}
+
+# Triple Expressions
+tripleExpr       = EachOf | OneOf | TripleConstraint ;
+tripleExprOrRef  = tripleExpr | tripleExprRef ;
+EachOf           {
+  id:tripleExprLabel ?
+  expressions:[tripleExprOrRef{2,}]
+  min:INTEGER ?
+  max:INTEGER ?
+  semActs:[SemAct+] ?
+  annotations:[Annotation+] ?
+}
+OneOf            {
+  id:tripleExprLabel ?
+  expressions:[tripleExprOrRef{2,}]
+  min:INTEGER ?
+  max:INTEGER ?
+  semActs:[SemAct+] ?
+  annotations:[Annotation+] ?
+}
+TripleConstraint {
+  id:tripleExprLabel ?
+  inverse:BOOL ?
+  predicate:IRIREF
+  valueExpr:shapeExprOrRef ?
+  min:INTEGER ?
+  max:INTEGER ?
+  semActs:[SemAct+] ?
+  annotations:[Annotation+] ?
+}
+tripleExprRef    = tripleExprLabel ;
+tripleExprLabel  = IRIREF | BNODE ;
+
+SemAct           { name:IRIREF code:STRING? }
+Annotation       { predicate:IRIREF object:objectValue }
 
 # Terminals used in productions:
-PREFIX           : PN_PREFIX? ; # <http://www.w3.org/TR/turtle/#grammar-production-PNAME_NS> - ":"
-IRI              : (PN_CHARS | '.' | ':' | '/' | '\\\\' | '#' | '@' | '%' | '&' | UCHAR)* ; # <http://www.w3.org/TR/turtle/#grammar-production-IRIREF> - "<>"s
-BNODE            : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)? ; # <http://www.w3.org/TR/turtle/#grammar-production-BLANK_NODE_LABEL>
-BOOL             : "true" | "false" ; # JSON boolean tokens
-INTEGER          : [+-]? [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-INTEGER>
-DECIMAL          : [+-]? [0-9]* '.' [0-9] + ; # <http://www.w3.org/TR/turtle/#grammar-production-DECIMAL>
-DOUBLE           : [+-]? ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9]+ EXPONENT | [0-9]+ EXPONENT) ; # <http://www.w3.org/TR/turtle/#grammar-production-DOUBLE>
-SIMPLE_LITERAL   : '"' ([^"\\\\\\r\\n] | '\\\\"')* '"' ; # JSON string with '"' at beginning and end
-DATATYPE_LITERAL : SIMPLE_LITERAL "^^" IRI ; # JSON string with '"' at beginning, an unescaped '"' followed by '^^' and an IRI
-LANG_LITERAL     : SIMPLE_LITERAL LANGTAG ; # JSON string with '"' at beginning, an unescaped '"' followed by '@' and a Turtle LANGTAG                   
+                 # <http://www.w3.org/TR/turtle/#grammar-production-IRIREF> - "<>"s
+IRIREF           : (IRIREF_NO_U | '_' IRIREF_NO_COLON) IRIREF_ALL*;
+                 # <http://www.w3.org/TR/turtle/#grammar-production-BLANK_NODE_LABEL>
+BNODE            : '_:' (PN_CHARS_U | [0-9]) ((PN_CHARS | '.')* PN_CHARS)? ;
+                 # JSON boolean tokens
+BOOL             : "true" | "false" ;
+                 # <http://www.w3.org/TR/turtle/#grammar-production-INTEGER>
+INTEGER          : [+-]? [0-9]+ ;
+                 # <http://www.w3.org/TR/turtle/#grammar-production-DECIMAL>
+DECIMAL          : [+-]? [0-9]* '.' [0-9]+ ;
+                 # <http://www.w3.org/TR/turtle/#grammar-production-DOUBLE>
+DOUBLE           : [+-]? ([0-9]+ '.' [0-9]* EXPONENT | '.' [0-9]+ EXPONENT | [0-9]+ EXPONENT) ;
+                 # <https://tools.ietf.org/search/bcp47>
+LANGTAG          : [a-zA-Z]+ ('-' [a-zA-Z0-9]+)* ;
 STRING           : .* ;
+EMPTY            : '' ;
 
 # Terminals use only in other terminals:
-PN_PREFIX        : PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)? ;
-PN_CHARS_BASE    : [A-Z] | [a-z] | [\\u00C0-\\u00D6] | [\\u00D8-\\u00F6]
-                 | [\\u00F8-\\u02FF] | [\\u0370-\\u037D] | [\\u037F-\\u1FFF]
-                 | [\\u200C-\\u200D] | [\\u2070-\\u218F] | [\\u2C00-\\u2FEF]
-                 | [\\u3001-\\uD7FF] | [\\uF900-\\uFDCF] | [\\uFDF0-\\uFFFD]
-                 | [\\u10000-\\uEFFFF] ;
-PN_CHARS         : PN_CHARS_U | '-' | [0-9] | '\\u00B7' | [\\u0300-\\u036F] | [\\u203F-\\u2040] ;
+IRIREF_NO_U      : (IRIREF_CHARS | ':') ;
+IRIREF_NO_COLON  : (IRIREF_CHARS | '_') ;
+IRIREF_ALL       : (IRIREF_CHARS | ':' | '_') ;
+IRIREF_CHARS     : [!#-9;=?-Z^a-z~] | PN_CHARS_EXT | DIACRITICALS | UCHAR ;
+PN_CHARS_BASE    : [A-Z] | [a-z] | PN_CHARS_EXT ;
+PN_CHARS_EXT     : [\u00C0-\u00D6] | [\u00D8-\u00F6]
+                 | [\u00F8-\u02FF] | [\u0370-\u037D] | [\u037F-\u1FFF]
+                 | [\u200C-\u200D] | [\u2070-\u218F] | [\u2C00-\u2FEF]
+                 | [\u3001-\uD7FF] | [\uF900-\uFDCF] | [\uFDF0-\uFFFD]
+                 | [\u10000-\uEFFFF] ;
+PN_CHARS         : PN_CHARS_U | DIACRITICALS ;
 PN_CHARS_U       : PN_CHARS_BASE | '_' ;
-UCHAR            : '\\\\u' HEX HEX HEX HEX
-                 | '\\\\U' HEX HEX HEX HEX HEX HEX HEX HEX ;
+DIACRITICALS     : '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] ;
+UCHAR            : '\\u' HEX HEX HEX HEX
+                 | '\\U' HEX HEX HEX HEX HEX HEX HEX HEX ;
 HEX              : [0-9] | [A-F] | [a-f] ;
-EXPONENT         : [eE] [+-]? [0-9]+ ;
-LANGTAG          : '@' [a-zA-Z] + ('-' [a-zA-Z0-9] +)* ;
-`; // '
+EXPONENT 	 : [eE] [+-]? [0-9]+ ;` // '
 
 prepareInterface();
 prepareDemos();
