@@ -1,0 +1,262 @@
+---
+- id: address
+  schema: |
+    address { street:NAME no:NUM? }
+    NAME : .*;
+    NUM : [0-9]+[a-e]?;
+  passes:
+  - id: complete
+    data:
+      street: Elm
+      'no': 123b
+  - id: just name
+    data:
+      street: Elm
+  fails:
+  - id: missing street
+    data:
+      'no': '123'
+  - id: extra property
+    data:
+      street: Elm
+      'no': 123b
+      x: y
+  - id: misspelled property
+    data:
+      street999: Elm
+      'no': 123b
+- id: person with address
+  schema: |
+    person { name:NAME addrs:[address]? }
+    address { street:NAME no:NUM? }
+    NAME : .*;
+    NUM : [0-9]+[a-e]?;
+  passes:
+  - id: no addrs
+    data:
+      name: Bob
+  - id: empty addresses
+    data:
+      name: Bob
+      addrs: []
+  - id: 1 address
+    data:
+      name: Bob
+      addrs:
+      - street: Elm
+        'no': 123b
+  - id: 2 addresses
+    data:
+      name: Bob
+      addrs:
+      - street: Elm
+        'no': 123b
+      - street: Forest
+        'no': '18'
+  fails:
+  - id: missing name
+    data:
+      addrs:
+      - street: Elm
+        'no': 123b
+  - id: bad address
+    data:
+      name: Bob
+      addrs:
+      - street: Elm
+        'no': 123b
+        x: y
+  - id: bad last addresses
+    data:
+      name: Bob
+      addrs:
+      - street: Elm
+        'no': 123b
+      - 'no': '18'
+- id: ShExJ
+  schemaURL: https://raw.githubusercontent.com/shexSpec/shexTest/main/doc/ShExJ.jsg
+  passes:
+  - id: ClinObs
+    data:
+      "@context": http://www.w3.org/ns/shex.jsonld
+      type: Schema
+      start: http://schema.example/ObservationShape
+      shapes:
+      - type: ShapeDecl
+        id: http://schema.example/ObservationShape
+        shapeExpr:
+          type: Shape
+          expression:
+            type: EachOf
+            expressions:
+            - type: TripleConstraint
+              predicate: http://hl7.org/fhir/status
+              valueExpr:
+                type: NodeConstraint
+                values:
+                - value: preliminary
+                - value: final
+            - type: TripleConstraint
+              predicate: http://hl7.org/fhir/subject
+              valueExpr: http://schema.example/PatientShape
+      - type: ShapeDecl
+        id: http://schema.example/PatientShape
+        shapeExpr:
+          type: Shape
+          expression:
+            type: EachOf
+            expressions:
+            - type: TripleConstraint
+              predicate: http://hl7.org/fhir/name
+              valueExpr:
+                type: NodeConstraint
+                datatype: http://www.w3.org/2001/XMLSchema#string
+              min: 0
+              max: -1
+            - type: TripleConstraint
+              predicate: http://hl7.org/fhir/birthdate
+              valueExpr:
+                type: NodeConstraint
+                datatype: http://www.w3.org/2001/XMLSchema#date
+              min: 0
+              max: 1
+  - id: IssueShape-EXTENDS
+    data:
+      type: Schema
+      shapes:
+      - type: ShapeDecl
+        id: http://a.example/IssueShape
+        shapeExpr:
+          type: Shape
+          closed: true
+          expression:
+            type: EachOf
+            expressions:
+            - type: TripleConstraint
+              predicate: http://ex.example/#reportedBy
+              valueExpr: http://a.example/PersonShape
+            - type: TripleConstraint
+              predicate: http://ex.example/#reproducedBy
+              valueExpr: http://a.example/EmployeeShape
+              min: 0
+              max: 1
+      - type: ShapeDecl
+        id: http://a.example/PersonShape
+        abstract: true
+        shapeExpr:
+          type: Shape
+          expression:
+            type: EachOf
+            expressions:
+            - type: OneOf
+              expressions:
+              - type: TripleConstraint
+                predicate: http://xmlns.com/foaf/name
+                valueExpr:
+                  type: NodeConstraint
+                  datatype: http://www.w3.org/2001/XMLSchema#string
+              - type: EachOf
+                expressions:
+                - type: TripleConstraint
+                  predicate: http://xmlns.com/foaf/givenName
+                  valueExpr:
+                    type: NodeConstraint
+                    datatype: http://www.w3.org/2001/XMLSchema#string
+                  min: 1
+                  max: -1
+                - type: TripleConstraint
+                  predicate: http://xmlns.com/foaf/familyName
+                  valueExpr:
+                    type: NodeConstraint
+                    datatype: http://www.w3.org/2001/XMLSchema#string
+            - type: TripleConstraint
+              predicate: http://xmlns.com/foaf/mbox
+              valueExpr:
+                type: NodeConstraint
+                nodeKind: iri
+      - type: ShapeDecl
+        id: http://a.example/UserShape
+        shapeExpr:
+          type: Shape
+          extends:
+          - http://a.example/PersonShape
+          closed: true
+          expression:
+            type: TripleConstraint
+            predicate: http://ex.example/#representative
+            valueExpr: http://a.example/EmployeeShape
+      - type: ShapeDecl
+        id: http://a.example/RepShape
+        abstract: true
+        shapeExpr:
+          type: Shape
+          expression:
+            type: TripleConstraint
+            predicate: http://xmlns.com/foaf/phone
+            valueExpr:
+              type: NodeConstraint
+              nodeKind: iri
+            min: 1
+            max: -1
+      - type: ShapeDecl
+        id: http://a.example/EmployeeShape
+        shapeExpr:
+          type: Shape
+          extends:
+          - http://a.example/PersonShape
+          - http://a.example/RepShape
+          closed: true
+      "@context": http://www.w3.org/ns/shex.jsonld
+  fails:
+  - id: misplaced attr
+    data:
+      type: Schema
+      shapes:
+      - type: ShapeDecl
+        id: http://a.example/S1
+        shapeExpr:
+          type: Shape
+          max: 5
+          expression:
+            type: TripleConstraint
+            predicate: http://a.example/p1
+            min: 2
+  - id: wrong type
+    data:
+      type: Schema
+      shapes:
+      - type: ShapeDecl
+        id: http://a.example/S1
+        shapeExpr:
+          type: Shape
+          expression:
+            type: TripleConstraint
+            predicate: http://a.example/p1
+            valueExpr:
+              type: ShapeOr
+              shapeExprs:
+              - type: ShapeAnd
+                shapeExprs:
+                - type: NodeConstraint
+                  nodeKind: bnode
+                - http://a.example/S1
+              - type: Inclusion
+                shapeExprs:
+                - type: NodeConstraint
+                  minlength: 5
+                - http://a.example/S1
+  - id: short array
+    data:
+      type: Schema
+      shapes:
+      - type: ShapeDecl
+        id: http://a.example/S1
+        shapeExpr:
+          type: Shape
+          expression:
+            type: TripleConstraint
+            predicate: http://a.example/p1
+            valueExpr:
+              type: ShapeAnd
+              shapeExprs:
+              - http://a.example/S1

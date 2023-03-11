@@ -8,20 +8,25 @@ function sum (s) { // cheap way to identify identical strings
     return a&a
   },0);
 }
-
-function load (selector, obj, func, listItems, side, str) {
+let Base = location.origin + location.pathname;
+async function load (selector, entries, func, listItems, side, str) {
   $(selector).empty();
-  Object.keys(obj).forEach(k => {
-    var li = $('<li><a href="#">' + k + '</li>');
+  return Promise.all(entries.map(async entry => {
+    const id = entry.id;
+    if ("schemaURL" in entry && !("schema" in entry)) {
+      const resp = await fetch(new URL(entry.schemaURL, Base));
+      entry.schema = await resp.text();
+    }
+    var li = $('<li><a href="#">' + id + '</li>');
     li.on("click", () => {
-      func(k, obj[k], li, listItems, side);
+      func(id, entry, li, listItems, side);
     });
-    listItems[side][sum(str(obj[k]))] = li;
+    listItems[side][sum(str(entry))] = li;
     $(selector).append(li);
-  });
+  }));
 }
 
-function clearData () {debugger;
+function clearData () {
   $("#data textarea").val("");
   $("#data .status").text(" ");
   $("#results").text("").removeClass("passes fails error");
@@ -64,7 +69,7 @@ function pickData (name, dataTest, elt, listItems, side) {
     clearData();
     $(elt).removeClass("selected");
   } else {
-    $("#data textarea").val(JSON.stringify(dataTest, null, "  "));
+    $("#data textarea").val(JSON.stringify(dataTest.data, null, "  "));
     $("#data .status").text(name);
     $("#data li.selected").removeClass("selected");
     $(elt).addClass("selected");
@@ -106,333 +111,34 @@ $("#clear").on("click", clearAll);
 // prepareDemos() is invoked after these variables are assigned:
 var addrSchema, perAddrSchema, shexjSchema;
 
-function prepareDemos () {
-  var demos = {
-    "address": {
-      schema: addrSchema,
-      passes: {
-        "complete": { "street":"Elm", "no":"123b" },
-        "just name": { "street":"Elm" },
-      },
-      fails: {
-        "missing street": { "no": "123" },
-        "extra property": { "street":"Elm", "no":"123b", "x": "y" },
-        "misspelled property": { "street999":"Elm", "no":"123b" }
-      }
-    },
-    "person with address": {
-      schema: perAddrSchema,
-      passes: {
-        "no addrs": { "name": "Bob" },
-        "empty addresses": { "name": "Bob", "addrs": [] },
-        "1 address": { "name": "Bob", "addrs": [
-          { "street":"Elm", "no":"123b" }
-        ] },
-        "2 addresses": { "name": "Bob", "addrs": [
-          { "street":"Elm", "no":"123b" },
-          { "street":"Forest", "no":"18" }
-        ] },
-      },
-      fails: {
-        "missing name": { "addrs": [
-          { "street":"Elm", "no":"123b" }
-        ] },
-        "bad address": { "name": "Bob", "addrs": [
-          { "street":"Elm", "no":"123b", "x": "y" }
-        ] },
-        "bad last addresses": { "name": "Bob", "addrs": [
-          { "street":"Elm", "no":"123b" },
-          { "no":"18" }
-        ] },
-      }
-    },
-    "ShExJ": {
-      schema: shexjSchema,
-      passes: {
-        "ClinObs":
-{
-  "@context": "http://www.w3.org/ns/shex.jsonld",
-  "type": "Schema",
-  "start": "http://schema.example/ObservationShape",
-  "shapes": [
-    {
-      "type": "ShapeDecl",
-      "id": "http://schema.example/ObservationShape",
-      "shapeExpr": {
-        "type": "Shape",
-        "expression": {
-          "type": "EachOf",
-          "expressions": [
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://hl7.org/fhir/status",
-              "valueExpr": {
-                "type": "NodeConstraint",
-                "values": [
-                  { "value": "preliminary" },
-                  { "value": "final" }
-                ]
-              }
-            },
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://hl7.org/fhir/subject",
-              "valueExpr": "http://schema.example/PatientShape"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": "ShapeDecl",
-      "id": "http://schema.example/PatientShape",
-      "shapeExpr": {
-      "type": "Shape",
-        "expression": {
-          "type": "EachOf",
-          "expressions": [
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://hl7.org/fhir/name",
-              "valueExpr": {
-                "type": "NodeConstraint",
-                "datatype": "http://www.w3.org/2001/XMLSchema#string"
-              },
-              "min": 0, "max": -1
-            },
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://hl7.org/fhir/birthdate",
-              "valueExpr": {
-                "type": "NodeConstraint",
-                "datatype": "http://www.w3.org/2001/XMLSchema#date"
-              },
-              "min": 0, "max": 1
-            }
-          ]
-        }
+async function prepareDemos () {
+  const iface = parseQueryString(location.search);
+  if (!("manifest" in iface) && !("manifestURL" in iface)) {
+    iface.manifestURL = ["../examples/manifest.json"];
+  }
+  let demos = null;
+  if ('manifestURL' in iface) {
+    const manifestUrl = new URL(iface.manifestURL || "doesnotexist.yaml", Base).href;
+    const resp = await fetch(manifestUrl);
+    const text = await resp.text();
+    try {
+      demos = JSON.parse(text);
+    } catch (eJson) {
+      try {
+        demos = jsyaml.load(text);
+      } catch (eYaml) {
+        const parseError = Error(`failed to parse format of ${manifestUrl}`);
+        console.error(parseError);
+        console.error(text);
+        console.error(eJson.message);
+        console.error(eYaml.message);
+        throw parseError;
       }
     }
-  ]
-}
-,
-        "IssueShape-EXTENDS":
-{
-  "type": "Schema",
-  "shapes": [
-    {
-      "type": "ShapeDecl",
-      "id": "http://a.example/IssueShape",
-      "shapeExpr": {
-        "type": "Shape",
-        "closed": true,
-        "expression": {
-          "type": "EachOf",
-          "expressions": [
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://ex.example/#reportedBy",
-              "valueExpr": "http://a.example/PersonShape"
-            },
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://ex.example/#reproducedBy",
-              "valueExpr": "http://a.example/EmployeeShape",
-              "min": 0,
-              "max": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": "ShapeDecl",
-      "id": "http://a.example/PersonShape",
-      "abstract": true,
-      "shapeExpr": {
-        "type": "Shape",
-        "expression": {
-          "type": "EachOf",
-          "expressions": [
-            {
-              "type": "OneOf",
-              "expressions": [
-                {
-                  "type": "TripleConstraint",
-                  "predicate": "http://xmlns.com/foaf/name",
-                  "valueExpr": {
-                    "type": "NodeConstraint",
-                    "datatype": "http://www.w3.org/2001/XMLSchema#string"
-                  }
-                },
-                {
-                  "type": "EachOf",
-                  "expressions": [
-                    {
-                      "type": "TripleConstraint",
-                      "predicate": "http://xmlns.com/foaf/givenName",
-                      "valueExpr": {
-                        "type": "NodeConstraint",
-                        "datatype": "http://www.w3.org/2001/XMLSchema#string"
-                      },
-                      "min": 1,
-                      "max": -1
-                    },
-                    {
-                      "type": "TripleConstraint",
-                      "predicate": "http://xmlns.com/foaf/familyName",
-                      "valueExpr": {
-                        "type": "NodeConstraint",
-                        "datatype": "http://www.w3.org/2001/XMLSchema#string"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "TripleConstraint",
-              "predicate": "http://xmlns.com/foaf/mbox",
-              "valueExpr": {
-                "type": "NodeConstraint",
-                "nodeKind": "iri"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": "ShapeDecl",
-      "id": "http://a.example/UserShape",
-      "shapeExpr": {
-        "type": "Shape",
-        "extends": [
-          "http://a.example/PersonShape"
-        ],
-        "closed": true,
-        "expression": {
-          "type": "TripleConstraint",
-          "predicate": "http://ex.example/#representative",
-          "valueExpr": "http://a.example/EmployeeShape"
-        }
-      }
-    },
-    {
-      "type": "ShapeDecl",
-      "id": "http://a.example/RepShape",
-      "abstract": true,
-      "shapeExpr": {
-        "type": "Shape",
-        "expression": {
-          "type": "TripleConstraint",
-          "predicate": "http://xmlns.com/foaf/phone",
-          "valueExpr": {
-            "type": "NodeConstraint",
-            "nodeKind": "iri"
-          },
-          "min": 1,
-          "max": -1
-        }
-      }
-    },
-    {
-      "type": "ShapeDecl",
-      "id": "http://a.example/EmployeeShape",
-      "shapeExpr": {
-        "type": "Shape",
-        "extends": [
-          "http://a.example/PersonShape",
-          "http://a.example/RepShape"
-        ],
-        "closed": true
-      }
-    }
-  ],
-  "@context": "http://www.w3.org/ns/shex.jsonld"
-}
-      },
-      fails: {
-        "misplaced attr":{
-          "type": "Schema",
-          "shapes":{
-            "http://a.example/S1": {
-              "type": "Shape", "max": 5,
-              "expression": {
-                "type": "TripleConstraint",
-                "predicate": "http://a.example/p1",
-                "min": 2
-              }
-            }
-          }
-        },
-        "wrong type": {
-          "type": "Schema",
-          "shapes": {
-            "http://a.example/S1": {
-              "type": "Shape",
-              "expression": {
-                "type": "TripleConstraint",
-                "predicate": "http://a.example/p1",
-                "valueExpr": {
-                  "type": "ShapeOr",
-                  "shapeExprs": [
-                    {
-                      "type": "ShapeAnd",
-                      "shapeExprs": [
-                        {
-                          "type": "NodeConstraint",
-                          "nodeKind": "bnode"
-                        },
-                        {
-                          "type": "ShapeRef",
-                          "reference": "http://a.example/S1"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Inclusion",
-                      "shapeExprs": [
-                        {
-                          "type": "NodeConstraint",
-                          "minlength": 5
-                        },
-                        {
-                          "type": "ShapeRef",
-                          "reference": "http://a.example/S1"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "short array": {
-          "type": "Schema",
-          "shapes": {
-            "http://a.example/S1": {
-              "type": "Shape",
-              "expression": {
-                "type": "TripleConstraint",
-                "predicate": "http://a.example/p1",
-                "valueExpr": {
-                  "type": "ShapeAnd",
-                  "shapeExprs": [
-//                    { "type": "NodeConstraint", "nodeKind": "bnode" },
-                    { "type": "ShapeRef", "reference": "http://a.example/S1" }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  };
-  var listItems = {schema:{}, data:{}};
-  load("#schema .examples ul", demos, pickSchema,
+    Base = manifestUrl;
+  }
+  const listItems = {schema:{}, data:{}};
+  await load("#schema .examples ul", demos, pickSchema,
        listItems, "schema", function (o) {
          return o.schema;
        });
@@ -461,6 +167,20 @@ function prepareDemos () {
     later(e.target, "data");
   });
 }
+
+/**
+ * parse query string into map of arrays
+ * location.search: e.g. "?schema=asdf&data=qwer&shape-map=ab%5Ecd%5E%5E_ef%5Egh"
+ */
+function parseQueryString (query) {
+  if (query[0]==='?') query=query.substr(1); // optional leading '?'
+  const map   = {};
+  query.replace(/([^&,=]+)=?([^&,]*)(?:[&,]+|$)/g, (match, key, value) => {
+    key=decodeURIComponent(key);value=decodeURIComponent(value);
+    (map[key] = map[key] || []).push(value);
+  });
+  return map;
+};
 
 function prepareInterface () {
   // don't overwrite if we arrived here from going back for forth in history
