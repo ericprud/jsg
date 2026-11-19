@@ -38,7 +38,7 @@
   "homepage": "https://github.com/ericprud/jsg#readme",
   "dependencies": {
     "@xmldom/xmldom": "^0.9.12",
-    "commander": "^2.19.0"
+    "commander": "^15.1.0"
   },
   "devDependencies": {
     "chai": "^6.3.0",
